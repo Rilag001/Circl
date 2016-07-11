@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -34,10 +35,12 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
 
         mAuth = FirebaseAuth.getInstance();
 
@@ -58,6 +61,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                 signIn();
             }
         });
+
 
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
@@ -118,6 +122,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     private void firebaseAuthWithGoogle(final GoogleSignInAccount acct) {
         Log.d(TAG, "firebaseAuthWithGoogle:" + acct.getId());
         AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
+        //AuthCredential credential = FacebookAuthProvider.getCredential(token.getToken());
         mAuth.signInWithCredential(credential)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
@@ -147,6 +152,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                     }
                 });
     }
+
 
 
     @Override

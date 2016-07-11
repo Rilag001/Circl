@@ -6,16 +6,16 @@ package se.rickylagerkvist.circl.Data;
 public class Profile {
 
     private String name;
-    private String age;
+    private String mPhotoUri;
     private boolean likesMovies;
     private boolean likesSports;
 
     public Profile() {
     }
 
-    public Profile(String name, String age, boolean likesMovies, boolean likesSports) {
+    public Profile(String name, String photoUri, boolean likesMovies, boolean likesSports) {
         this.name = name;
-        this.age = age;
+        mPhotoUri = photoUri;
         this.likesMovies = likesMovies;
         this.likesSports = likesSports;
     }
@@ -28,12 +28,12 @@ public class Profile {
         this.name = name;
     }
 
-    public String getAge() {
-        return age;
+    public String getPhotoUri() {
+        return mPhotoUri;
     }
 
-    public void setAge(String age) {
-        this.age = age;
+    public void setPhotoUri(String photoUri) {
+        mPhotoUri = photoUri;
     }
 
     public boolean isLikesMovies() {

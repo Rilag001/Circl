@@ -35,9 +35,13 @@ dependencies {
     compile 'com.google.firebase:firebase-core:9.2.0'
     compile 'com.google.firebase:firebase-database:9.2.0'
     compile 'com.google.firebase:firebase-auth:9.2.0'
+    compile 'com.firebase:geofire-android:2.0.0'
 
+
+    // Circleimageview & Glide
     compile 'com.github.bumptech.glide:glide:3.7.0'
     compile 'de.hdodenhof:circleimageview:2.1.0'
+
 
 }
 

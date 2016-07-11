@@ -39,7 +39,6 @@ public class MainActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
 
         mUserUid = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getString("USERUID", "defaultStringIfNothingFound");
-
         // if mUserUid has default value start LoginActivity
         Intent intent;
         if (mUserUid.equals("defaultStringIfNothingFound")) {
@@ -121,7 +120,6 @@ public class MainActivity extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
-    @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.

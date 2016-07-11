@@ -13,8 +13,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.firebase.geofire.GeoFire;
-import com.firebase.geofire.GeoLocation;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -31,7 +29,7 @@ public class ProfileFragment extends Fragment {
     String mUserUid, mDisplayName, mProfilePicURL;
     ImageView mPhotoImageView;
     Uri mPhotoUri;
-    Boolean mLikeMovies, mLikeSports;
+    //Boolean mLikeMovies, mLikeSports;
     DatabaseReference myProfileRef;
 
 
@@ -49,17 +47,12 @@ public class ProfileFragment extends Fragment {
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         myProfileRef = database.getReference("profiles");
 
-        // init Geofire
-        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("userLocal");
-        GeoFire geoFire = new GeoFire(ref);
-
         // get user info
         mUserUid = PreferenceManager.getDefaultSharedPreferences(getContext()).getString("USERUID", "defaultStringIfNothingFound");
         mDisplayName = PreferenceManager.getDefaultSharedPreferences(getContext()).getString("DISPLAY_NAME", "defaultStringIfNothingFound");
         mPhotoUri = Uri.parse(PreferenceManager.getDefaultSharedPreferences(getContext()).getString("PHOTO_URL", "defaultStringIfNothingFound"));
 
-        // set geofire location
-        geoFire.setLocation(mUserUid, new GeoLocation(37.7853889, -122.4056973));
+
 
         mNameTextView = (TextView) view.findViewById(R.id.profile_name);
         mPhotoImageView = (ImageView) view.findViewById(R.id.profile_pic);
@@ -82,9 +75,12 @@ public class ProfileFragment extends Fragment {
         //myProfileRef.child(mUserUid).setValue(profile);
 
 
-
-
         return view;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
     }
 
     @Override

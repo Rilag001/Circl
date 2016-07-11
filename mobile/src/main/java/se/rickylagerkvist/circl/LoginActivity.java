@@ -8,8 +8,8 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
 import android.widget.Toast;
-
 
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -39,8 +39,8 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_login);
-
 
         mAuth = FirebaseAuth.getInstance();
 
@@ -62,19 +62,17 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
             }
         });
 
-
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 FirebaseUser user = firebaseAuth.getCurrentUser();
                 if (user != null) {
                     // User is signed in
-                    Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
                     Intent startMainActivity = new Intent(LoginActivity.this, MainActivity.class);
+                    startMainActivity.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startMainActivity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    //startMainActivity.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
                     startActivity(startMainActivity);
-                } else {
-                    // User is signed out
-                    Log.d(TAG, "onAuthStateChanged:signed_out");
                 }
                 // ...
             }
@@ -139,7 +137,10 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                         PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit().putString("PHOTO_URL", photoURL.toString()).apply();
 
                         Intent startMainActivity = new Intent(LoginActivity.this, MainActivity.class);
-                                                startActivity(startMainActivity);
+                        startMainActivity.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startMainActivity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        //startMainActivity.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+                        startActivity(startMainActivity);
 
                         // If sign in fails, display a message to the user. If sign in succeeds
                         // the auth state listener will be notified and logic to handle the

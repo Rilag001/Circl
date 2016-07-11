@@ -16,6 +16,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.firebase.geofire.GeoFire;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -28,8 +29,9 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     DatabaseReference myRef, myProfileRef;
-    String mUserUid;
     FloatingActionButton mFab;
+    GeoFire geoFire;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,14 +40,10 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        mUserUid = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getString("USERUID", "defaultStringIfNothingFound");
-        // if mUserUid has default value start LoginActivity
-        Intent intent;
-        if (mUserUid.equals("defaultStringIfNothingFound")) {
-            intent = new Intent(this, LoginActivity.class);
-            startActivity(intent);
-            finish();
-        }
+        // init Geofire
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("userLocal");
+        geoFire = new GeoFire(ref);
+
 
         // Write a message to the database
         FirebaseDatabase database = FirebaseDatabase.getInstance();
@@ -56,6 +54,8 @@ public class MainActivity extends AppCompatActivity
         mFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, AlertActivity.class);
+                startActivity(intent);
             }
         });
 
@@ -168,5 +168,6 @@ public class MainActivity extends AppCompatActivity
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
+
 
 }

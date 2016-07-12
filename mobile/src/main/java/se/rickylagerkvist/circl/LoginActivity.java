@@ -129,17 +129,18 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
                         String displayName = acct.getDisplayName();
                         Uri photoURL = acct.getPhotoUrl();
-
+                        String email = acct.getEmail();
                         String uid = mAuth.getCurrentUser().getUid();
+
                         // save mUserUid to sharedPref
                         PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit().putString("USERUID", uid).apply();
                         PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit().putString("DISPLAY_NAME", displayName).apply();
                         PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit().putString("PHOTO_URL", photoURL.toString()).apply();
+                        PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit().putString("EMAIL", email).apply();
 
                         Intent startMainActivity = new Intent(LoginActivity.this, MainActivity.class);
                         startMainActivity.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         startMainActivity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                        //startMainActivity.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
                         startActivity(startMainActivity);
 
                         // If sign in fails, display a message to the user. If sign in succeeds

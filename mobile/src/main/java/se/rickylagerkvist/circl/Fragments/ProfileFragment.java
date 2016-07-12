@@ -24,9 +24,9 @@ import se.rickylagerkvist.circl.R;
  */
 public class ProfileFragment extends Fragment {
 
-    TextView mNameTextView;
+    TextView mNameTextView, mEmailTextView;
     CheckBox mLikeMoviesCheckBox, mLikeSportsCheckBox;
-    String mUserUid, mDisplayName, mProfilePicURL;
+    String mUserUid, mDisplayName, mProfilePicURL, mUserEmail;
     ImageView mPhotoImageView;
     Uri mPhotoUri;
     //Boolean mLikeMovies, mLikeSports;
@@ -51,15 +51,16 @@ public class ProfileFragment extends Fragment {
         mUserUid = PreferenceManager.getDefaultSharedPreferences(getContext()).getString("USERUID", "defaultStringIfNothingFound");
         mDisplayName = PreferenceManager.getDefaultSharedPreferences(getContext()).getString("DISPLAY_NAME", "defaultStringIfNothingFound");
         mPhotoUri = Uri.parse(PreferenceManager.getDefaultSharedPreferences(getContext()).getString("PHOTO_URL", "defaultStringIfNothingFound"));
-
-
+        mUserEmail = PreferenceManager.getDefaultSharedPreferences(getContext()).getString("EMAIL", "defaultStringIfNothingFound");
 
         mNameTextView = (TextView) view.findViewById(R.id.profile_name);
+        mEmailTextView = (TextView) view.findViewById(R.id.profile_email);
         mPhotoImageView = (ImageView) view.findViewById(R.id.profile_pic);
-        // set profile info
-        mNameTextView.setText("   " + mDisplayName);
-        Glide.with(this).load(mPhotoUri).into(mPhotoImageView);
 
+        // set profile info
+        mNameTextView.setText(mDisplayName);
+        mEmailTextView.setText(mUserEmail);
+        Glide.with(this).load(mPhotoUri).into(mPhotoImageView);
 
         mLikeMoviesCheckBox = (CheckBox) view.findViewById(R.id.likes_movies);
         mLikeSportsCheckBox = (CheckBox) view.findViewById(R.id.likes_sports);

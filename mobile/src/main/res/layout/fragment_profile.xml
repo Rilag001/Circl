@@ -3,15 +3,14 @@
              android:layout_width="match_parent"
              android:layout_height="match_parent"
              android:orientation="vertical"
-             android:padding="4dp"
+             android:padding="8dp"
              tools:context=".Fragments.ProfileFragment">
-
-
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
+        android:layout_marginBottom="8dp"
         android:id="@+id/profile">
 
         <de.hdodenhof.circleimageview.CircleImageView
@@ -21,13 +20,29 @@
             android:layout_height="96dp"
             android:layout_gravity="center"/>
 
-        <TextView
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/profile_name"
-            android:hint="Name"
-            android:textSize="25sp"
-            android:layout_gravity="center_vertical"/>
+            android:layout_marginLeft="8dp"
+            android:layout_marginStart="8dp"
+            android:orientation="vertical"
+            android:layout_gravity="center_vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/profile_name"
+                android:hint="@string/hint_name"
+                android:textSize="25sp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/profile_email"
+                android:hint="@string/hint_email"
+                android:textSize="12sp"/>
+        </LinearLayout>
+
     </LinearLayout>
 
 
@@ -43,14 +58,14 @@
     <CheckBox
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="I like movies"
+        android:text="Movies"
         android:id="@+id/likes_movies"
         android:layout_below="@+id/profile_intrest"/>
 
     <CheckBox
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="I like sports"
+        android:text="Sports"
         android:id="@+id/likes_sports"
         android:layout_below="@+id/likes_movies"/>
 

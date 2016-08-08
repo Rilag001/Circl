@@ -1,15 +1,10 @@
 package se.rickylagerkvist.circl;
 
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.location.Location;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
@@ -17,41 +12,23 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
 import com.firebase.geofire.GeoFire;
-import com.firebase.geofire.GeoLocation;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationListener;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationServices;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 
 import se.rickylagerkvist.circl.Fragments.AchievementsFragment;
 import se.rickylagerkvist.circl.Fragments.ContactsFragment;
 import se.rickylagerkvist.circl.Fragments.ProfileFragment;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener,
-        GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener,
-        LocationListener {
+        implements NavigationView.OnNavigationItemSelectedListener {
 
     FloatingActionButton mFab;
-    GeoFire geoFire;
+    GeoFire mGeoFire;
     String mUserUid;
-
-    private GoogleApiClient mGoogleApiClient;
-    private LocationRequest mLocationRequest;
-    private static final int REQUEST_CODE_LOCATION = 2;
-    private final String LOG_TAG = "TestApp";
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,19 +37,14 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        // start service
+        Intent startGeoFireService = new Intent(this, GeoFireService.class);
+        this.startService(startGeoFireService);
+
+
         // get user info
         mUserUid = PreferenceManager.getDefaultSharedPreferences(this).getString("USERUID", "defaultStringIfNothingFound");
 
-        // init Geofire
-        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("userLocal");
-        geoFire = new GeoFire(ref);
-
-        // Build GoogleApiClient
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addApi(LocationServices.API)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .build();
 
         mFab = (FloatingActionButton) findViewById(R.id.fab);
         mFab.setOnClickListener(new View.OnClickListener() {
@@ -82,6 +54,7 @@ public class MainActivity extends AppCompatActivity
                 startActivity(intent);
             }
         });
+
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -101,6 +74,7 @@ public class MainActivity extends AppCompatActivity
         transaction.addToBackStack(null);
         transaction.commit();
         getSupportActionBar().setTitle("Profile");
+
     }
 
     @Override
@@ -129,6 +103,7 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.log_out) {
+            // Log out of FireBase
             FirebaseAuth.getInstance().signOut();
 
             // Blank user sharedPref.
@@ -140,6 +115,8 @@ public class MainActivity extends AppCompatActivity
             // Start LoginActivity
             Intent startLoginActivity = new Intent(MainActivity.this, LoginActivity.class);
             startActivity(startLoginActivity);
+        } else if (id == R.id.stop_geoTacking) {
+            mGeoFire.removeLocation("mUserUid");
         }
 
         return super.onOptionsItemSelected(item);
@@ -197,57 +174,16 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onStart() {
         super.onStart();
-        // Connect the client
-        mGoogleApiClient.connect();
     }
 
     @Override
     protected void onStop() {
-        super.onStop();
-        // Disconnect the client
-        mGoogleApiClient.disconnect();
-    }
-
-
-    // For LocationServices
-    @Override
-    public void onConnected(@Nullable Bundle bundle) {
-
-        mLocationRequest = LocationRequest.create();
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        mLocationRequest.setInterval(5000); // Update every second (in ms)
-
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-
-            // Request missing location permission.
-            ActivityCompat.requestPermissions(this,
-                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
-                    REQUEST_CODE_LOCATION);
-
-        } else {
-            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
-        }
-
+        super.onStop();;
     }
 
     @Override
-    public void onConnectionSuspended(int i) {
-        Log.i(LOG_TAG, "GoogleApiClient connection has been suspended");
-
+    protected void onDestroy() {
+        super.onDestroy();
     }
 
-    @Override
-    public void onLocationChanged(Location location) {
-        Log.i(LOG_TAG, location.toString());
-
-        //
-        geoFire.setLocation(mUserUid, new GeoLocation(location.getLatitude(), location.getLongitude()));
-
-    }
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        Log.i(LOG_TAG, "GoogleApiClient connection has failed");
-
-    }
 }

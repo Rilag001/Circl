@@ -26,7 +26,7 @@ public class ProfileFragment extends Fragment {
 
     TextView mNameTextView, mEmailTextView;
     CheckBox mLikeMoviesCheckBox, mLikeSportsCheckBox;
-    String mUserUid, mDisplayName, mProfilePicURL, mUserEmail;
+    String mUserUid, mDisplayName, mProfilePicURL, mUserEmail, mPhotoString;
     ImageView mPhotoImageView;
     Uri mPhotoUri;
     //Boolean mLikeMovies, mLikeSports;
@@ -50,6 +50,7 @@ public class ProfileFragment extends Fragment {
         // get user info
         mUserUid = PreferenceManager.getDefaultSharedPreferences(getContext()).getString("USERUID", "defaultStringIfNothingFound");
         mDisplayName = PreferenceManager.getDefaultSharedPreferences(getContext()).getString("DISPLAY_NAME", "defaultStringIfNothingFound");
+        mPhotoString = PreferenceManager.getDefaultSharedPreferences(getContext()).getString("PHOTO_URL", "defaultStringIfNothingFound");
         mPhotoUri = Uri.parse(PreferenceManager.getDefaultSharedPreferences(getContext()).getString("PHOTO_URL", "defaultStringIfNothingFound"));
         mUserEmail = PreferenceManager.getDefaultSharedPreferences(getContext()).getString("EMAIL", "defaultStringIfNothingFound");
 
@@ -60,7 +61,11 @@ public class ProfileFragment extends Fragment {
         // set profile info
         mNameTextView.setText(mDisplayName);
         mEmailTextView.setText(mUserEmail);
-        Glide.with(this).load(mPhotoUri).into(mPhotoImageView);
+        if (mPhotoString.equals("defaultStringIfNothingFound")) {
+            mPhotoImageView.setImageResource(R.color.colorPrimary);
+        } else {
+            Glide.with(this).load(mPhotoUri).into(mPhotoImageView);
+        }
 
         mLikeMoviesCheckBox = (CheckBox) view.findViewById(R.id.likes_movies);
         mLikeSportsCheckBox = (CheckBox) view.findViewById(R.id.likes_sports);
@@ -73,7 +78,7 @@ public class ProfileFragment extends Fragment {
         Boolean mLikeSports = mLikeSportsCheckBox.isChecked();
 
         Profile profile = new Profile(mDisplayName, mProfilePicURL, mLikeMovies, mLikeSports);
-        //myProfileRef.child(mUserUid).setValue(profile);
+        myProfileRef.child(mUserUid).setValue(profile);
 
 
         return view;

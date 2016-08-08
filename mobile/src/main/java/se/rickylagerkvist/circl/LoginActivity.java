@@ -1,11 +1,11 @@
 package se.rickylagerkvist.circl;
 
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
@@ -128,14 +128,18 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                         Log.d(TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
 
                         String displayName = acct.getDisplayName();
-                        Uri photoURL = acct.getPhotoUrl();
+                        String photoURL = acct.getPhotoUrl().toString();
                         String email = acct.getEmail();
                         String uid = mAuth.getCurrentUser().getUid();
 
                         // save mUserUid to sharedPref
                         PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit().putString("USERUID", uid).apply();
                         PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit().putString("DISPLAY_NAME", displayName).apply();
-                        PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit().putString("PHOTO_URL", photoURL.toString()).apply();
+                        if (!TextUtils.isEmpty(photoURL)){
+                            PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit().putString("PHOTO_URL", photoURL).apply();
+                        } else {
+                            PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit().putString("PHOTO_URL", "defaultStringIfNothingFound").apply();
+                        }
                         PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit().putString("EMAIL", email).apply();
 
                         Intent startMainActivity = new Intent(LoginActivity.this, MainActivity.class);

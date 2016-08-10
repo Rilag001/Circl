@@ -38,7 +38,7 @@
         android:background="@color/colorPrimaryLight"
         android:id="@+id/fabAccept"
         android:src="@android:drawable/ic_input_add"
-        android:onClick="stopActivity"
+        android:onClick="goToMainActivity"
         android:layout_alignTop="@+id/fabStop"
         android:layout_alignLeft="@+id/contactName"
         android:layout_alignStart="@+id/contactName"

@@ -10,6 +10,7 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -37,17 +38,15 @@ public class GeoFireService extends Service
 
     private static final String TAG = "GeoFireService";
 
-    GeoFire mGeoFire;
-    String mUserUid, userName, userPhotoUri;
-    GeoQuery geoQuery;
-    DatabaseReference firebaseProfiles;
+    public GeoFire mGeoFire;
+    public String mUserUid, userName, userPhotoUri;
+    public GeoQuery geoQuery;
+    public DatabaseReference firebaseProfiles;
 
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
     private static final int REQUEST_CODE_LOCATION = 2;
     private final String LOG_TAG = "TestApp";
-
-    boolean alertActivityActive;
 
 
     @Override
@@ -55,7 +54,12 @@ public class GeoFireService extends Service
         super.onCreate();
         // get user info
         mUserUid = PreferenceManager.getDefaultSharedPreferences(this).getString("USERUID", "defaultStringIfNothingFound");
-        alertActivityActive = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("alertActivityActive", false);
+
+        if (mUserUid.equals("defaultStringIfNothingFound") || mUserUid.isEmpty() || mUserUid == null){
+            Intent i = new Intent(getBaseContext(), MainActivity.class);
+            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(i);
+        }
 
         // init Firebase database
         FirebaseDatabase dataRef = FirebaseDatabase.getInstance();
@@ -103,9 +107,7 @@ public class GeoFireService extends Service
 
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
-            Log.i(LOG_TAG, "Yo");
-            /* Request missing location permission.
-            ActivityCompat.requestPermissions(this,
+            /*ActivityCompat.requestPermissions(this,
                     new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
                     REQUEST_CODE_LOCATION); */
 
@@ -136,7 +138,6 @@ public class GeoFireService extends Service
                 } else {
                     System.out.println("Location saved on server successfully!");
                 }
-
             }
         });
 
@@ -144,10 +145,14 @@ public class GeoFireService extends Service
         geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
             @Override
             public void onKeyEntered(String key, GeoLocation location) {
-                //System.out.println(String.format("Key %s entered the search area at [%f,%f]", key, location.latitude, location.longitude));
+                System.out.println(String.format("Key %s entered the search area at [%f,%f]", key, location.latitude, location.longitude));
+
+                boolean alertActivityActive = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getBoolean("alertActivityActive", false);
+                AppCompatActivity application = (AppCompatActivity) AlertActivity.getContext();
+                AlertActivity a = (AlertActivity) application;
 
                 // check that key is not you and that alertActivityActive is not currently open
-                if (!key.matches(mUserUid) && !alertActivityActive) {
+                if (!key.matches(mUserUid)) {
                     //Toast.makeText(MainActivity.this, String.format("Key %s entered the search area at [%f,%f]", key, location.latitude, location.longitude), Toast.LENGTH_SHORT).show();
 
                     firebaseProfiles.child(key).addValueEventListener(new ValueEventListener() {
@@ -163,6 +168,15 @@ public class GeoFireService extends Service
 
                         }
                     });
+
+
+                    /*if (userName != null && !userName.isEmpty()){
+                        Intent intent = new Intent(getBaseContext(), AlertActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        intent.putExtra("USER_NAME", userName);
+                        intent.putExtra("USER_PHOTO", userPhotoUri);
+                        startActivity(intent);
+                    }*/
 
                     Intent intent = new Intent(getBaseContext(), AlertActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

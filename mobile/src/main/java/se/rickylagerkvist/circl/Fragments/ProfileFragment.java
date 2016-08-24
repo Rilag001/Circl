@@ -1,6 +1,7 @@
 package se.rickylagerkvist.circl.Fragments;
 
 
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -8,7 +9,6 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -20,6 +20,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import se.rickylagerkvist.circl.EditAboutMeActivty;
 import se.rickylagerkvist.circl.R;
 
 /**
@@ -27,8 +28,7 @@ import se.rickylagerkvist.circl.R;
  */
 public class ProfileFragment extends Fragment {
 
-    TextView mNameTextView, mEmailTextView;
-    EditText mAboutMeTextView;
+    TextView mNameTextView, mEmailTextView, mAboutMeTextView;
     String mUserUid, mDisplayName, mUserEmail, mPhotoString;
     ImageButton mEditAboutMeButton;
     ImageView mPhotoImageView;
@@ -61,15 +61,14 @@ public class ProfileFragment extends Fragment {
         mEmailTextView = (TextView) view.findViewById(R.id.profile_email);
         mPhotoImageView = (ImageView) view.findViewById(R.id.profile_pic);
 
-        mAboutMeTextView = (EditText) view.findViewById(R.id.aboutMeInput);
+        mAboutMeTextView = (TextView) view.findViewById(R.id.aboutMeInput);
         mEditAboutMeButton = (ImageButton) view.findViewById(R.id.editAboutMeButton);
 
         mEditAboutMeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-                mAboutMeTextView.setEnabled(true);
-
+                Intent editAboutMeActivty = new Intent(getActivity(), EditAboutMeActivty.class);
+                startActivity(editAboutMeActivty);
             }
         });
 

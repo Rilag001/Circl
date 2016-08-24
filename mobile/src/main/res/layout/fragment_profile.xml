@@ -96,10 +96,9 @@
                         android:layout_alignParentRight="true"
                         android:layout_alignParentEnd="true"/>
 
-                    <EditText
+                    <TextView
                         android:layout_width="match_parent"
                         android:layout_marginTop="8dp"
-                        android:enabled="false"
                         android:layout_height="wrap_content"
                         android:layout_below="@id/aboutMeTitle"
                         android:text=""

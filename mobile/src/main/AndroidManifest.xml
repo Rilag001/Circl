@@ -62,7 +62,16 @@
             android:label="@string/title_activity_settings">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="se.rickylagerkvist.circl.Main2Activity" />
+                android:value="se.rickylagerkvist.circl.Main2Activity"/>
+        </activity>
+        <activity
+            android:name=".EditAboutMeActivty"
+            android:label="@string/title_activity_edit_about_me_activty"
+            android:parentActivityName=".Main2Activity"
+            android:theme="@style/AppTheme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="se.rickylagerkvist.circl.Main2Activity"/>
         </activity>
     </application>
 

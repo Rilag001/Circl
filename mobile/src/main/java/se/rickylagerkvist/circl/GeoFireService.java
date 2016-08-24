@@ -10,7 +10,6 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -56,7 +55,7 @@ public class GeoFireService extends Service
         mUserUid = PreferenceManager.getDefaultSharedPreferences(this).getString("USERUID", "defaultStringIfNothingFound");
 
         if (mUserUid.equals("defaultStringIfNothingFound") || mUserUid.isEmpty() || mUserUid == null){
-            Intent i = new Intent(getBaseContext(), MainActivity.class);
+            Intent i = new Intent(getBaseContext(), LoginActivity.class);
             i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(i);
         }
@@ -78,6 +77,8 @@ public class GeoFireService extends Service
 
         mGoogleApiClient.connect();
     }
+
+
 
 
     public GeoFireService() {
@@ -127,7 +128,12 @@ public class GeoFireService extends Service
     public void onLocationChanged(Location location) {
         Log.i(LOG_TAG, location.toString());
 
-        geoQuery = mGeoFire.queryAtLocation(new GeoLocation(location.getLatitude(), location.getLongitude()), 0.6);
+        Toast.makeText(GeoFireService.this, "Your location is." + location.getLatitude() + " " + location.getLongitude(), Toast.LENGTH_SHORT).show();
+
+        // get user set pref distance
+        double geoFireDistance = 0.1;
+
+        geoQuery = mGeoFire.queryAtLocation(new GeoLocation(location.getLatitude(), location.getLongitude()), geoFireDistance);
 
         // update Geofire
         mGeoFire.setLocation(mUserUid, new GeoLocation(location.getLatitude(), location.getLongitude()), new GeoFire.CompletionListener() {
@@ -147,9 +153,11 @@ public class GeoFireService extends Service
             public void onKeyEntered(String key, GeoLocation location) {
                 System.out.println(String.format("Key %s entered the search area at [%f,%f]", key, location.latitude, location.longitude));
 
+                Toast.makeText(GeoFireService.this, String.format("Key %s entered the search area at [%f,%f]", key, location.latitude, location.longitude), Toast.LENGTH_SHORT).show();
+
                 boolean alertActivityActive = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getBoolean("alertActivityActive", false);
-                AppCompatActivity application = (AppCompatActivity) AlertActivity.getContext();
-                AlertActivity a = (AlertActivity) application;
+                //AppCompatActivity application = (AppCompatActivity) AlertActivity.getContext();
+                //AlertActivity a = (AlertActivity) application;
 
                 // check that key is not you and that alertActivityActive is not currently open
                 if (!key.matches(mUserUid)) {
@@ -170,19 +178,15 @@ public class GeoFireService extends Service
                     });
 
 
-                    /*if (userName != null && !userName.isEmpty()){
+                    // start AlertActivity if its not active
+                    if(!alertActivityActive){
                         Intent intent = new Intent(getBaseContext(), AlertActivity.class);
                         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         intent.putExtra("USER_NAME", userName);
                         intent.putExtra("USER_PHOTO", userPhotoUri);
                         startActivity(intent);
-                    }*/
+                    }
 
-                    Intent intent = new Intent(getBaseContext(), AlertActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    intent.putExtra("USER_NAME", userName);
-                    intent.putExtra("USER_PHOTO", userPhotoUri);
-                    startActivity(intent);
                 }
             }
 
@@ -214,4 +218,5 @@ public class GeoFireService extends Service
         Log.i(LOG_TAG, "GoogleApiClient connection has failed");
 
     }
+
 }

@@ -3,6 +3,10 @@
     <color name="colorPrimary">#009688</color>
     <color name="colorPrimaryDark">#00796B</color>
     <color name="colorPrimaryLight">#B2DFDB</color>
-    <color name="colorAccent">#FF5722</color>
+    <color name="colorAccent">#76afcf</color>
     <color name="colorTextIcons">#FFFFFF</color>
+
+    <color name="color1">#df5a55</color>
+    <color name="color2">#f9bb72</color>
+    <color name="color3">#76afcf</color>
 </resources>

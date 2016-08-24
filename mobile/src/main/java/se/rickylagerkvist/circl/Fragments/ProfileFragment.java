@@ -8,15 +8,18 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CheckBox;
+import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
-import se.rickylagerkvist.circl.Data.Profile;
 import se.rickylagerkvist.circl.R;
 
 /**
@@ -25,11 +28,11 @@ import se.rickylagerkvist.circl.R;
 public class ProfileFragment extends Fragment {
 
     TextView mNameTextView, mEmailTextView;
-    CheckBox mLikeMoviesCheckBox, mLikeSportsCheckBox;
-    String mUserUid, mDisplayName, mProfilePicURL, mUserEmail, mPhotoString;
+    EditText mAboutMeTextView;
+    String mUserUid, mDisplayName, mUserEmail, mPhotoString;
+    ImageButton mEditAboutMeButton;
     ImageView mPhotoImageView;
     Uri mPhotoUri;
-    //Boolean mLikeMovies, mLikeSports;
     DatabaseReference myProfileRef;
 
 
@@ -43,10 +46,6 @@ public class ProfileFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_profile, container, false);
 
-        // Write a message to the database
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        myProfileRef = database.getReference("profiles");
-
         // get user info
         mUserUid = PreferenceManager.getDefaultSharedPreferences(getContext()).getString("USERUID", "defaultStringIfNothingFound");
         mDisplayName = PreferenceManager.getDefaultSharedPreferences(getContext()).getString("DISPLAY_NAME", "defaultStringIfNothingFound");
@@ -54,9 +53,29 @@ public class ProfileFragment extends Fragment {
         mPhotoUri = Uri.parse(PreferenceManager.getDefaultSharedPreferences(getContext()).getString("PHOTO_URL", "defaultStringIfNothingFound"));
         mUserEmail = PreferenceManager.getDefaultSharedPreferences(getContext()).getString("EMAIL", "defaultStringIfNothingFound");
 
+        //
+        myProfileRef = FirebaseDatabase.getInstance().getReference("profiles").child(mUserUid).child("aboutMe");
+
+
         mNameTextView = (TextView) view.findViewById(R.id.profile_name);
         mEmailTextView = (TextView) view.findViewById(R.id.profile_email);
         mPhotoImageView = (ImageView) view.findViewById(R.id.profile_pic);
+
+        mAboutMeTextView = (EditText) view.findViewById(R.id.aboutMeInput);
+        mEditAboutMeButton = (ImageButton) view.findViewById(R.id.editAboutMeButton);
+
+        mEditAboutMeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                mAboutMeTextView.setEnabled(true);
+
+            }
+        });
+
+
+        // change image size
+        String biggerPhoto =  mPhotoUri.toString().replace("s96-c", "s150-c");
 
         // set profile info
         mNameTextView.setText(mDisplayName);
@@ -64,25 +83,29 @@ public class ProfileFragment extends Fragment {
         if (mPhotoString.equals("defaultStringIfNothingFound")) {
             mPhotoImageView.setImageResource(R.color.colorPrimary);
         } else {
-            Glide.with(this).load(mPhotoUri).into(mPhotoImageView);
+            Glide.with(this).load(biggerPhoto).into(mPhotoImageView);
         }
 
-        mLikeMoviesCheckBox = (CheckBox) view.findViewById(R.id.likes_movies);
-        mLikeSportsCheckBox = (CheckBox) view.findViewById(R.id.likes_sports);
+        myProfileRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                String text = dataSnapshot.getValue(String.class);
+                mAboutMeTextView.setText(text);
+            }
 
-        mLikeSportsCheckBox.setChecked(true);
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
 
-        mProfilePicURL = PreferenceManager.getDefaultSharedPreferences(getContext()).getString("PHOTO_URL", "defaultStringIfNothingFound");
-        //check current state of a check box (true or false)
-        Boolean mLikeMovies = mLikeMoviesCheckBox.isChecked();
-        Boolean mLikeSports = mLikeSportsCheckBox.isChecked();
+            }
+        });
 
-        Profile profile = new Profile(mDisplayName, mProfilePicURL, mLikeMovies, mLikeSports);
-        myProfileRef.child(mUserUid).setValue(profile);
+
 
 
         return view;
     }
+
+
 
     @Override
     public void onStart() {

@@ -27,5 +27,8 @@
     <string name="hint_name">Name</string>
     <string name="hint_email">testname@gmail.com</string>
     <string name="stop_geotacking">Stop GeoTacking</string>
+    <string name="Achievements">Achievements</string>
+    <string name="Profile">Profile</string>
+    <string name="settings">Settings</string>
 
 </resources>

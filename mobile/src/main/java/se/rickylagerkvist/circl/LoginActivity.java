@@ -68,7 +68,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                 FirebaseUser user = firebaseAuth.getCurrentUser();
                 if (user != null) {
                     // User is signed in
-                    Intent startMainActivity = new Intent(LoginActivity.this, MainActivity.class);
+                    Intent startMainActivity = new Intent(LoginActivity.this, Main2Activity.class);
                     startMainActivity.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     startMainActivity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     //startMainActivity.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
@@ -142,7 +142,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                         }
                         PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit().putString("EMAIL", email).apply();
 
-                        Intent startMainActivity = new Intent(LoginActivity.this, MainActivity.class);
+                        Intent startMainActivity = new Intent(LoginActivity.this, Main2Activity.class);
                         startMainActivity.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         startMainActivity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
                         startActivity(startMainActivity);

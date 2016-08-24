@@ -13,12 +13,9 @@ public class AutoStart extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
 
-        if (!isMyServiceRunning(GeoFireService.class, context)) {
-            Intent startGeoFireService = new Intent(context, GeoFireService.class);
-            context.startService(startGeoFireService);
-            Log.i("Autostart", "started");
-        }
-
+        Intent startGeoFireService = new Intent(context, GeoFireService.class);
+        context.startService(startGeoFireService);
+        Log.i("Autostart", "started");
 
     }
 

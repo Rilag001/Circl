@@ -1,13 +1,13 @@
 package se.rickylagerkvist.circl;
 
+import android.app.ActivityManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -18,7 +18,6 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.TextView;
 
 import com.gigamole.navigationtabbar.ntb.NavigationTabBar;
 import com.google.firebase.auth.FirebaseAuth;
@@ -43,6 +42,10 @@ public class Main2Activity extends AppCompatActivity {
 
         Intent startService = new Intent(Main2Activity.this, GeoFireService.class);
         startService(startService);
+
+        if (getIntent().getBooleanExtra("EXIT", false)) {
+            finish();
+        }
 
     }
 
@@ -76,9 +79,15 @@ public class Main2Activity extends AppCompatActivity {
             // Start LoginActivity
             Intent startLoginActivity = new Intent(Main2Activity.this, LoginActivity.class);
             startActivity(startLoginActivity);
+
         } else if (id == R.id.stop_geoTacking) {
+            Intent stopService = new Intent(Main2Activity.this, GeoFireService.class);
+            stopService(stopService);
+
+        } else  if (id == R.id.start_geoTacking) {
             Intent startService = new Intent(Main2Activity.this, GeoFireService.class);
-            stopService(startService);
+            startService(startService);
+
         } else  if (id == R.id.settings) {
             Intent startSettingsActivity = new Intent(Main2Activity.this, SettingsActivity.class);
             startActivity(startSettingsActivity);
@@ -186,8 +195,10 @@ public class Main2Activity extends AppCompatActivity {
         findViewById(R.id.fab).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View v) {
+                Intent startAlertActivity = new Intent(Main2Activity.this, AlertActivity.class);
+                startActivity(startAlertActivity);
 
-                coordinatorLayout.postDelayed(new Runnable() {
+                /*coordinatorLayout.postDelayed(new Runnable() {
                     @Override
                     public void run() {
                         final Snackbar snackbar = Snackbar.make(navigationTabBar, "Woho!", Snackbar.LENGTH_SHORT);
@@ -196,7 +207,7 @@ public class Main2Activity extends AppCompatActivity {
                                 .setTextColor(Color.parseColor("#423752"));
                         snackbar.show();
                     }
-                }, 1000);
+                }, 1000);*/
             }
         });
 
@@ -228,6 +239,17 @@ public class Main2Activity extends AppCompatActivity {
             // Show 3 total pages.
             return 3;
         }
+    }
+
+    // http://stackoverflow.com/questions/600207/how-to-check-if-a-service-is-running-on-android
+    private boolean isMyServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

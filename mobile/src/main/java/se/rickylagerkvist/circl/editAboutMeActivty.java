@@ -19,7 +19,7 @@ public class EditAboutMeActivty extends AppCompatActivity {
 
     DatabaseReference myProfileRef;
     EditText userInput;
-    String mUserUid, intentText;
+    String mUserUid;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,9 +32,6 @@ public class EditAboutMeActivty extends AppCompatActivity {
         mUserUid = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getString("USERUID", "defaultStringIfNothingFound");
         myProfileRef = FirebaseDatabase.getInstance().getReference("profiles").child(mUserUid).child("aboutMe");
 
-        /*Bundle extras = getIntent().getExtras();
-        intentText = extras.getString("i");
-        userInput.setText(intentText);*/
 
         myProfileRef.addValueEventListener(new ValueEventListener() {
             @Override

@@ -107,11 +107,8 @@ public class GeoFireService extends Service
         mLocationRequest.setInterval(5000); // Update every second (in ms)
 
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-
-            /*ActivityCompat.requestPermissions(this,
-                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
-                    REQUEST_CODE_LOCATION); */
-
+            Intent intent = new Intent(getBaseContext(), SplashActivity.class);
+            startActivity(intent);
         } else {
             LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
         }
@@ -155,9 +152,6 @@ public class GeoFireService extends Service
 
                 Toast.makeText(GeoFireService.this, String.format("Key %s entered the search area at [%f,%f]", key, location.latitude, location.longitude), Toast.LENGTH_SHORT).show();
 
-                boolean alertActivityActive = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getBoolean("alertActivityActive", false);
-                //AppCompatActivity application = (AppCompatActivity) AlertActivity.getContext();
-                //AlertActivity a = (AlertActivity) application;
 
                 // check that key is not you and that alertActivityActive is not currently open
                 if (!key.matches(mUserUid)) {
@@ -177,16 +171,11 @@ public class GeoFireService extends Service
                         }
                     });
 
-
-                    // start AlertActivity if its not active
-                    if(!alertActivityActive){
-                        Intent intent = new Intent(getBaseContext(), AlertActivity.class);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        intent.putExtra("USER_NAME", userName);
-                        intent.putExtra("USER_PHOTO", userPhotoUri);
-                        startActivity(intent);
-                    }
-
+                    Intent intent = new Intent(getBaseContext(), AlertActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    intent.putExtra("USER_NAME", userName);
+                    intent.putExtra("USER_PHOTO", userPhotoUri);
+                    startActivity(intent);
                 }
             }
 

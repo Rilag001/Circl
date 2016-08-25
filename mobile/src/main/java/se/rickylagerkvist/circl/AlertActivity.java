@@ -18,8 +18,9 @@ public class AlertActivity extends AppCompatActivity {
     Uri mPhotoUri;
     TextView mContactName;
     ImageView mContactImage;
-
+    boolean isInFront;
     MediaPlayer mp;
+    int rawSound;
 
 
     @Override
@@ -27,19 +28,17 @@ public class AlertActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_alert);
 
-        // start playing sound
-        mp = MediaPlayer.create(getApplicationContext(), R.raw.bumbibjornarna);
-        mp.start();
-
-
+        rawSound = R.raw.bumbibjornarna;
+        mp = MediaPlayer.create(getApplicationContext(), rawSound);
 
         Intent i = getIntent();
         Bundle b = i.getExtras();
 
-        // get name and image
-        if (b.get("USER_NAME")!=null && b.get("USER_PHOTO") != null) {
-            mDisplayName = (String) b.get("USER_NAME");
-            mPhotoUri =  Uri.parse((String) b.get("USER_PHOTO"));
+        if (b != null){
+            if (b.get("USER_NAME")!=null && b.get("USER_PHOTO") != null) {
+                mDisplayName = (String) b.get("USER_NAME");
+                mPhotoUri =  Uri.parse((String) b.get("USER_PHOTO"));
+            }
         } else {
             mDisplayName = PreferenceManager.getDefaultSharedPreferences(this).getString("DISPLAY_NAME", "defaultStringIfNothingFound");
             mPhotoUri = Uri.parse(PreferenceManager.getDefaultSharedPreferences(this).getString("PHOTO_URL", "defaultStringIfNothingFound"));
@@ -50,7 +49,7 @@ public class AlertActivity extends AppCompatActivity {
         mContactImage = (ImageView) findViewById(R.id.contactImage);
 
         // change image size
-        tempPhoto =  mPhotoUri.toString().replace("s96-c", "s250-c");
+        tempPhoto =  mPhotoUri.toString().replace("s96-c", "s200-c");
 
         // set name and image
         mContactName.setText("   " + mDisplayName);
@@ -58,37 +57,53 @@ public class AlertActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
-        PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit().putBoolean("alertActivityActive", false).apply();
+    public void onResume() {
+        super.onResume();
+        isInFront = true;
+        playSound();
+        stopGeoFireService();
     }
+
 
     @Override
     protected void onPause() {
         super.onPause();
+        isInFront = false;
+        stopSound();
+        startGeoFireService();
     }
 
-    @Override
-    protected void onStop() {
-        super.onStop();
-        PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit().putBoolean("alertActivityActive", false).apply();
+    private void playSound() {
+        mp.start();
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        //PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit().putBoolean("alertActivityActive", false).apply();
-    }
-
-    public void stopActivity(View view) {
-        onStop();
-        //stop playing
+    public void stopSound(){
         mp.stop();
-        /*// start service
+    }
+
+
+    public void stopGeoFireService() {
+        Intent stopGeoFireService = new Intent(this, GeoFireService.class);
+        getApplicationContext().stopService(stopGeoFireService);
+    }
+
+    public void startGeoFireService() {
         Intent startGeoFireService = new Intent(this, GeoFireService.class);
-        getApplicationContext().startService(startGeoFireService);*/
-        //exit
-        System.exit(2);
+        getApplicationContext().stopService(startGeoFireService);
+    }
+
+    // works fine!
+    public void stopActivity(View view) {
+        mp.stop();
+        finish();
+    }
+
+    public void stopApp(View view) {
+        mp.stop();
+        finish();
+        Intent i = new Intent(Intent.ACTION_MAIN);
+        i.addCategory(Intent.CATEGORY_HOME);
+        startActivity(i);
     }
 
 }

@@ -14,6 +14,12 @@
         app:showAsAction="collapseActionView"/>
 
     <item
+        android:id="@+id/start_geoTacking"
+        android:orderInCategory="100"
+        android:title="@string/start_geotracking"
+        app:showAsAction="collapseActionView"/>
+
+    <item
         android:id="@+id/settings"
         android:orderInCategory="100"
         android:title="@string/settings"

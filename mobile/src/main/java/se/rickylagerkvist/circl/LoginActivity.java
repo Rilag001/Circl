@@ -132,6 +132,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                         String email = acct.getEmail();
                         String uid = mAuth.getCurrentUser().getUid();
 
+
                         // save mUserUid to sharedPref
                         PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit().putString("USERUID", uid).apply();
                         PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit().putString("DISPLAY_NAME", displayName).apply();

@@ -13,7 +13,7 @@ public class SplashActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-                // check if logged in
+        // check if logged in
         mUserUid = PreferenceManager.getDefaultSharedPreferences(this).getString("USERUID", "defaultStringIfNothingFound");
         if (mUserUid.equals("defaultStringIfNothingFound")) {
             Intent intent = new Intent(this, LoginActivity.class);

@@ -9,6 +9,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 
@@ -28,8 +29,9 @@ public class AlertActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_alert);
 
-        rawSound = R.raw.bumbibjornarna;
+        rawSound = R.raw.bellsbellsbells;
         mp = MediaPlayer.create(getApplicationContext(), rawSound);
+        mp.setLooping(true);
 
         Intent i = getIntent();
         Bundle b = i.getExtras();
@@ -48,51 +50,41 @@ public class AlertActivity extends AppCompatActivity {
         mContactName = (TextView) findViewById(R.id.contactName);
         mContactImage = (ImageView) findViewById(R.id.contactImage);
 
-        // change image size
-        tempPhoto =  mPhotoUri.toString().replace("s96-c", "s200-c");
+        if(mPhotoUri != null){
+            // change image size
+            tempPhoto =  mPhotoUri.toString().replace("s96-c", "s200-c");
+            setNameAndPic();
+        }
 
+    }
+
+    public void setNameAndPic(){
         // set name and image
         mContactName.setText("   " + mDisplayName);
         Glide.with(this).load(Uri.parse(tempPhoto)).into(mContactImage);
+
     }
 
     @Override
     public void onResume() {
         super.onResume();
         isInFront = true;
-        playSound();
-        stopGeoFireService();
+        PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit().putBoolean("ALERT_IS_INFRONT", isInFront).apply();
+        Toast.makeText(AlertActivity.this, "AlertActivity is in front", Toast.LENGTH_SHORT).show();
+        mp.start();
     }
 
 
     @Override
     protected void onPause() {
         super.onPause();
-        isInFront = false;
-        stopSound();
-        startGeoFireService();
-    }
-
-    private void playSound() {
-        mp.start();
-    }
-
-    public void stopSound(){
         mp.stop();
+        isInFront = false;
+        PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit().putBoolean("ALERT_IS_INFRONT", isInFront).apply();
+        Toast.makeText(AlertActivity.this, "AlertActivity is NOT in front", Toast.LENGTH_SHORT).show();
     }
 
 
-    public void stopGeoFireService() {
-        Intent stopGeoFireService = new Intent(this, GeoFireService.class);
-        getApplicationContext().stopService(stopGeoFireService);
-    }
-
-    public void startGeoFireService() {
-        Intent startGeoFireService = new Intent(this, GeoFireService.class);
-        getApplicationContext().stopService(startGeoFireService);
-    }
-
-    // works fine!
     public void stopActivity(View view) {
         mp.stop();
         finish();

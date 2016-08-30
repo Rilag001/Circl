@@ -3,6 +3,7 @@ package se.rickylagerkvist.circl.Fragments;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
@@ -97,6 +98,16 @@ public class ProfileFragment extends Fragment {
 
             }
         });
+
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            mPhotoImageView.setElevation(10);
+        } else {
+            mPhotoImageView.bringToFront();
+            view.requestLayout();
+            view.invalidate();
+        }
+
 
 
 

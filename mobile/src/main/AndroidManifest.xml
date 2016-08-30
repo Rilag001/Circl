@@ -44,15 +44,14 @@
         </activity>
 
         <receiver
-            android:name=".AutoStart"
-            android:enabled="true"
-            android:exported="true">
+            android:name=".AutoStart">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+            </intent-filter>
         </receiver>
 
         <service
-            android:name=".GeoFireService"
-            android:enabled="true"
-            android:exported="true">
+            android:name=".GeoFireService">
         </service>
 
         <activity android:name=".Main2Activity">
@@ -73,6 +72,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="se.rickylagerkvist.circl.Main2Activity"/>
         </activity>
+
     </application>
 
 </manifest>

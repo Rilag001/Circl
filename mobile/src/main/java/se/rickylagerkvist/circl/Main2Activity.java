@@ -40,12 +40,16 @@ public class Main2Activity extends AppCompatActivity {
         initUI();
         checkForLocationPermit();
 
-        Intent startService = new Intent(Main2Activity.this, GeoFireService.class);
-        startService(startService);
 
-        if (getIntent().getBooleanExtra("EXIT", false)) {
+        /*Intent startService = new Intent(Main2Activity.this, GeoFireService.class);
+        startService(startService);*/
+
+        // init to false
+        PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit().putBoolean("ALERT_IS_INFRONT", false).apply();
+
+        /*if (getIntent().getBooleanExtra("EXIT", false)) {
             finish();
-        }
+        }*/
 
     }
 
@@ -83,6 +87,9 @@ public class Main2Activity extends AppCompatActivity {
         } else if (id == R.id.stop_geoTacking) {
             Intent stopService = new Intent(Main2Activity.this, GeoFireService.class);
             stopService(stopService);
+
+            String mUserUid = PreferenceManager.getDefaultSharedPreferences(this).getString("USERUID", "defaultStringIfNothingFound");
+            GeoFireService.mGeoFire.removeLocation(mUserUid);
 
         } else  if (id == R.id.start_geoTacking) {
             Intent startService = new Intent(Main2Activity.this, GeoFireService.class);

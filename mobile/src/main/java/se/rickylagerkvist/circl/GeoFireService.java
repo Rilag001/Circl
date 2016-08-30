@@ -28,6 +28,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
+
 import se.rickylagerkvist.circl.Data.Profile;
 
 public class GeoFireService extends Service
@@ -37,7 +39,7 @@ public class GeoFireService extends Service
 
     private static final String TAG = "GeoFireService";
 
-    public GeoFire mGeoFire;
+    static public GeoFire mGeoFire;
     public String mUserUid, userName, userPhotoUri;
     public GeoQuery geoQuery;
     public DatabaseReference firebaseProfiles;
@@ -47,17 +49,25 @@ public class GeoFireService extends Service
     private static final int REQUEST_CODE_LOCATION = 2;
     private final String LOG_TAG = "TestApp";
 
+    private ArrayList<String> contacts;
+
+
+
+
 
     @Override
     public void onCreate() {
         super.onCreate();
+
+        contacts = new ArrayList<>();
+
         // get user info
         mUserUid = PreferenceManager.getDefaultSharedPreferences(this).getString("USERUID", "defaultStringIfNothingFound");
 
         if (mUserUid.equals("defaultStringIfNothingFound") || mUserUid.isEmpty() || mUserUid == null){
-            Intent i = new Intent(getBaseContext(), LoginActivity.class);
-            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(i);
+
+            Intent stopGeoFireService = new Intent(getBaseContext(), GeoFireService.class);
+            stopService(stopGeoFireService);
         }
 
         // init Firebase database
@@ -79,11 +89,18 @@ public class GeoFireService extends Service
     }
 
 
-
-
     public GeoFireService() {
     }
 
+
+    public void onDestroy() {
+        mGoogleApiClient.disconnect();
+        mGeoFire.removeLocation(mUserUid);
+        Toast.makeText(this, "GeoFireService Stopped", Toast.LENGTH_LONG).show();
+        Log.d(TAG, "onDestroy");
+    }
+
+    @Nullable
     @Override
     public IBinder onBind(Intent intent) {
         return null;
@@ -91,20 +108,13 @@ public class GeoFireService extends Service
 
 
 
-    public void onDestroy() {
-        mGoogleApiClient.disconnect();
-        //mGeoFire.removeLocation(mUserUid);
-        Toast.makeText(this, "GeoFireService Stopped", Toast.LENGTH_LONG).show();
-        Log.d(TAG, "onDestroy");
-    }
-
 
     // local
     @Override
     public void onConnected(@Nullable Bundle bundle) {
         mLocationRequest = LocationRequest.create();
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        mLocationRequest.setInterval(5000); // Update every second (in ms)
+        mLocationRequest.setInterval(5000); // Update every 5 seconds (in ms)
 
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             Intent intent = new Intent(getBaseContext(), SplashActivity.class);
@@ -157,6 +167,8 @@ public class GeoFireService extends Service
                 if (!key.matches(mUserUid)) {
                     //Toast.makeText(MainActivity.this, String.format("Key %s entered the search area at [%f,%f]", key, location.latitude, location.longitude), Toast.LENGTH_SHORT).show();
 
+
+
                     firebaseProfiles.child(key).addValueEventListener(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
@@ -171,11 +183,20 @@ public class GeoFireService extends Service
                         }
                     });
 
-                    Intent intent = new Intent(getBaseContext(), AlertActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    intent.putExtra("USER_NAME", userName);
-                    intent.putExtra("USER_PHOTO", userPhotoUri);
-                    startActivity(intent);
+
+                    // if AlertActivity is not visible & userName & userPhotoUri is not null, open Alert
+                    if (!PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getBoolean("ALERT_IS_INFRONT", false)
+                            && userName != null && userPhotoUri !=null
+                            && !contacts.contains(key)) {
+                        Intent intent = new Intent(getBaseContext(), AlertActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        intent.putExtra("USER_NAME", userName);
+                        intent.putExtra("USER_PHOTO", userPhotoUri);
+                        startActivity(intent);
+                        contacts.add(key);
+                        Toast.makeText(GeoFireService.this, key + " added to contacts", Toast.LENGTH_SHORT).show();
+                    }
+
                 }
             }
 

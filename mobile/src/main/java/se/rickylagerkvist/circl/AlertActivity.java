@@ -143,6 +143,8 @@ public class AlertActivity extends AppCompatActivity
     protected void onDestroy() {
         super.onDestroy();
         mMediaPlayer.stop();
+        mMediaPlayer.release();
+        mMediaPlayer = null;
     }
 
     public void stopActivity(View view) {

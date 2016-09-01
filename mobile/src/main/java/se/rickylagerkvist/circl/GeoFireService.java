@@ -49,6 +49,7 @@ public class GeoFireService extends Service
 
     //private ArrayList<String> contacts;
 
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -87,8 +88,6 @@ public class GeoFireService extends Service
     }
 
 
-    public GeoFireService() {
-    }
 
 
 

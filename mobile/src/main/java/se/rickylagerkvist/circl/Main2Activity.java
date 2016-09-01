@@ -41,15 +41,8 @@ public class Main2Activity extends AppCompatActivity {
         checkForLocationPermit();
 
 
-        /*Intent startService = new Intent(Main2Activity.this, GeoFireService.class);
-        startService(startService);*/
-
         // init to false
         PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit().putBoolean("ALERT_IS_INFRONT", false).apply();
-
-        /*if (getIntent().getBooleanExtra("EXIT", false)) {
-            finish();
-        }*/
 
     }
 

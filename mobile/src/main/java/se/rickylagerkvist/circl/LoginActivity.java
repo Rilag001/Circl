@@ -25,6 +25,10 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
+import se.rickylagerkvist.circl.Data.Profile;
 
 public class LoginActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener{
 
@@ -34,6 +38,8 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     private static final int RC_SIGN_IN = 9001;
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
+
+    private DatabaseReference myProfileRef;
 
 
     @Override
@@ -71,7 +77,6 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                     Intent startMainActivity = new Intent(LoginActivity.this, Main2Activity.class);
                     startMainActivity.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     startMainActivity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    //startMainActivity.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
                     startActivity(startMainActivity);
                 }
                 // ...
@@ -127,11 +132,15 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         Log.d(TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
 
+                        // get info from acct
                         String displayName = acct.getDisplayName();
                         String photoURL = acct.getPhotoUrl().toString();
-                        String email = acct.getEmail();
                         String uid = mAuth.getCurrentUser().getUid();
 
+                        // save profile to database
+                        myProfileRef = FirebaseDatabase.getInstance().getReference("profiles").child(uid);
+                        Profile myProfile = new Profile(displayName, photoURL, "");
+                        myProfileRef.setValue(myProfile);
 
                         // save mUserUid to sharedPref
                         PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit().putString("USERUID", uid).apply();
@@ -141,8 +150,8 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                         } else {
                             PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit().putString("PHOTO_URL", "defaultStringIfNothingFound").apply();
                         }
-                        PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit().putString("EMAIL", email).apply();
 
+                        // start MainActivity
                         Intent startMainActivity = new Intent(LoginActivity.this, Main2Activity.class);
                         startMainActivity.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         startMainActivity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);

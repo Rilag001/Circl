@@ -3,7 +3,6 @@ package se.rickylagerkvist.circl.Fragments;
 
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
@@ -29,12 +28,13 @@ import se.rickylagerkvist.circl.R;
  */
 public class ProfileFragment extends Fragment {
 
-    TextView mNameTextView, mEmailTextView, mAboutMeTextView;
-    String mUserUid, mDisplayName, mUserEmail, mPhotoString;
+    TextView mNameTextView, mAboutMeTextView;
+    String mUserUid, mDisplayName, mPhotoString;
     ImageButton mEditAboutMeButton;
     ImageView mPhotoImageView;
     Uri mPhotoUri;
     DatabaseReference myProfileRef;
+    ValueEventListener profileListener;
 
 
     public ProfileFragment() {
@@ -44,27 +44,15 @@ public class ProfileFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_profile, container, false);
 
-        // get user info
-        mUserUid = PreferenceManager.getDefaultSharedPreferences(getContext()).getString("USERUID", "defaultStringIfNothingFound");
-        mDisplayName = PreferenceManager.getDefaultSharedPreferences(getContext()).getString("DISPLAY_NAME", "defaultStringIfNothingFound");
-        mPhotoString = PreferenceManager.getDefaultSharedPreferences(getContext()).getString("PHOTO_URL", "defaultStringIfNothingFound");
-        mPhotoUri = Uri.parse(PreferenceManager.getDefaultSharedPreferences(getContext()).getString("PHOTO_URL", "defaultStringIfNothingFound"));
-        mUserEmail = PreferenceManager.getDefaultSharedPreferences(getContext()).getString("EMAIL", "defaultStringIfNothingFound");
-
-        //
+        // database ref
         myProfileRef = FirebaseDatabase.getInstance().getReference("profiles").child(mUserUid).child("aboutMe");
+        getUserInfo();
+        initUI(view);
 
 
-        mNameTextView = (TextView) view.findViewById(R.id.profile_name);
-        mEmailTextView = (TextView) view.findViewById(R.id.profile_email);
-        mPhotoImageView = (ImageView) view.findViewById(R.id.profile_pic);
-
-        mAboutMeTextView = (TextView) view.findViewById(R.id.aboutMeInput);
-        mEditAboutMeButton = (ImageButton) view.findViewById(R.id.editAboutMeButton);
-
+        // open EditAboutMeActivty to edit aboutMe
         mEditAboutMeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -74,19 +62,7 @@ public class ProfileFragment extends Fragment {
         });
 
 
-        // change image size
-        String biggerPhoto =  mPhotoUri.toString().replace("s96-c", "s150-c");
-
-        // set profile info
-        mNameTextView.setText(mDisplayName);
-        mEmailTextView.setText(mUserEmail);
-        if (mPhotoString.equals("defaultStringIfNothingFound")) {
-            mPhotoImageView.setImageResource(R.color.colorPrimary);
-        } else {
-            Glide.with(this).load(biggerPhoto).into(mPhotoImageView);
-        }
-
-        myProfileRef.addValueEventListener(new ValueEventListener() {
+        myProfileRef.addValueEventListener(profileListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 String text = dataSnapshot.getValue(String.class);
@@ -99,31 +75,40 @@ public class ProfileFragment extends Fragment {
             }
         });
 
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            mPhotoImageView.setElevation(10);
-        } else {
-            mPhotoImageView.bringToFront();
-            view.requestLayout();
-            view.invalidate();
-        }
-
-
-
-
-
         return view;
     }
 
+    private void initUI(View view) {
+        mNameTextView = (TextView) view.findViewById(R.id.profile_name);
+        mPhotoImageView = (ImageView) view.findViewById(R.id.profile_pic);
+        mAboutMeTextView = (TextView) view.findViewById(R.id.aboutMeInput);
+        mEditAboutMeButton = (ImageButton) view.findViewById(R.id.editAboutMeButton);
 
+        // change image size
+        String biggerPhoto =  mPhotoUri.toString().replace("s96-c", "s150-c");
 
-    @Override
-    public void onStart() {
-        super.onStart();
+        // set profile info
+        mNameTextView.setText(mDisplayName);
+        if (mPhotoString.equals("defaultStringIfNothingFound")) {
+            mPhotoImageView.setImageResource(R.color.colorPrimary);
+        } else {
+            Glide.with(this).load(biggerPhoto).into(mPhotoImageView);
+        }
+    }
+
+    private void getUserInfo() {
+        // get user info
+        mUserUid = PreferenceManager.getDefaultSharedPreferences(getContext()).getString("USERUID", "defaultStringIfNothingFound");
+        mDisplayName = PreferenceManager.getDefaultSharedPreferences(getContext()).getString("DISPLAY_NAME", "defaultStringIfNothingFound");
+        mPhotoString = PreferenceManager.getDefaultSharedPreferences(getContext()).getString("PHOTO_URL", "defaultStringIfNothingFound");
+        mPhotoUri = Uri.parse(PreferenceManager.getDefaultSharedPreferences(getContext()).getString("PHOTO_URL", "defaultStringIfNothingFound"));
     }
 
     @Override
-    public void onStop() {
-        super.onStop();
+    public void onDestroy() {
+        super.onDestroy();
+        myProfileRef.removeEventListener(profileListener);
     }
+
+
 }

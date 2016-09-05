@@ -1,7 +1,5 @@
 package se.rickylagerkvist.circl;
 
-import android.app.ActivityManager;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -71,7 +69,6 @@ public class Main2Activity extends AppCompatActivity {
             PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit().putString("USERUID", null).apply();
             PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit().putString("DISPLAY_NAME", null).apply();
             PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit().putString("PHOTO_URL", null).apply();
-            PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit().putString("EMAIL", null).apply();
 
             // Start LoginActivity
             Intent startLoginActivity = new Intent(Main2Activity.this, LoginActivity.class);
@@ -239,17 +236,6 @@ public class Main2Activity extends AppCompatActivity {
             // Show 3 total pages.
             return 3;
         }
-    }
-
-    // http://stackoverflow.com/questions/600207/how-to-check-if-a-service-is-running-on-android
-    private boolean isMyServiceRunning(Class<?> serviceClass) {
-        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-            if (serviceClass.getName().equals(service.service.getClassName())) {
-                return true;
-            }
-        }
-        return false;
     }
 
 }

@@ -5,27 +5,28 @@ package se.rickylagerkvist.circl.Data;
  */
 public class Profile {
 
-    private String name;
+    private String mName;
     private String mPhotoUri;
-    private boolean likesMovies;
-    private boolean likesSports;
+    private String mAboutMe;
+
 
     public Profile() {
     }
 
-    public Profile(String name, String photoUri, boolean likesMovies, boolean likesSports) {
-        this.name = name;
-        mPhotoUri = photoUri;
-        this.likesMovies = likesMovies;
-        this.likesSports = likesSports;
+    public Profile(String name, String photoUri, String aboutMe) {
+        this.mName = name;
+        this.mPhotoUri = photoUri;
+        this.mAboutMe = aboutMe;
+
+
     }
 
     public String getName() {
-        return name;
+        return mName;
     }
 
     public void setName(String name) {
-        this.name = name;
+        this.mName = name;
     }
 
     public String getPhotoUri() {
@@ -36,19 +37,11 @@ public class Profile {
         mPhotoUri = photoUri;
     }
 
-    public boolean isLikesMovies() {
-        return likesMovies;
+    public String getAboutMe() {
+        return mAboutMe;
     }
 
-    public void setLikesMovies(boolean likesMovies) {
-        this.likesMovies = likesMovies;
-    }
-
-    public boolean isLikesSports() {
-        return likesSports;
-    }
-
-    public void setLikesSports(boolean likesSports) {
-        this.likesSports = likesSports;
+    public void setAboutMe(String aboutMe) {
+        mAboutMe = aboutMe;
     }
 }

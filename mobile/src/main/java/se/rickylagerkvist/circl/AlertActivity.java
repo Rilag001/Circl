@@ -25,6 +25,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -33,90 +34,107 @@ public class AlertActivity extends AppCompatActivity
         implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener{
 
-    String mDisplayName, tempPhoto;
-    Uri mPhotoUri;
-    TextView mContactName;
-    ImageView mContactImage;
-    boolean isInFront;
+    private String mYourDisplayName, mOtherUserDisplayName, mOtherUseTempPhoto, mYourTempPhoto;
+    private Uri mOtherUsePhotoUri, mYourPhotoUri;
+    private boolean mIsInFront;
 
-    MediaPlayer mMediaPlayer;
-    int rawSound;
+    private MediaPlayer mMediaPlayer;
 
-    GoogleMap mMap;
+    public GoogleMap mMap;
     private static final int ERROR_DIALOG_REQUEST = 9001;
-    private static final double
-            STOCKHOLM_LAT = 59.329040,
-            STOCKHOLM_LNG = 18.068616;
+    private double mMyLat, mMyLng, mOtherUserLat, mOtherUserLng;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //setContentView(R.layout.activity_alert);
 
-        // show if locked http://stackoverflow.com/questions/14554616/start-an-activity-even-when-android-phone-is-in-locked-mode-on-lock-screen
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
-                + WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD|
-                + WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED|
-                + WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
+        getGeoFireIntents();
+        setScreenToBeOn();
+        checkIfServicesOK();
+        setUpMediaPlayer();
+        initUi();
+    }
 
-        if (servicesOK()) {
-            setContentView(R.layout.activity_alert_2);
+    private void initUi() {
 
-            if (initMap()) {
-                goToLocation(STOCKHOLM_LAT, STOCKHOLM_LNG, 15);
-
-            } else {
-                Toast.makeText(AlertActivity.this, "Map not connected!", Toast.LENGTH_SHORT).show();
-            }
-
+        if(mOtherUsePhotoUri != null){
+            // change image size
+            mOtherUseTempPhoto =  mOtherUsePhotoUri.toString().replace("s96-c", "s150-c");
+            setNameAndPic();
         }
 
-        rawSound = R.raw.bellsbellsbells;
-        mMediaPlayer = MediaPlayer.create(getApplicationContext(), rawSound);
-        mMediaPlayer.setLooping(true);
-        mMediaPlayer.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
-        //mMediaPlayer.start();
+        mYourPhotoUri = Uri.parse(PreferenceManager.getDefaultSharedPreferences(this).getString("PHOTO_URL", "defaultStringIfNothingFound"));
+        mYourTempPhoto = mYourPhotoUri.toString().replace("s96-c", "s150-c");
+    }
 
-
+    private void getGeoFireIntents() {
         Intent i = getIntent();
         Bundle b = i.getExtras();
 
         if (b != null){
             if (b.get("USER_NAME")!=null && b.get("USER_PHOTO") != null) {
-                mDisplayName = (String) b.get("USER_NAME");
-                mPhotoUri =  Uri.parse((String) b.get("USER_PHOTO"));
+                mOtherUserDisplayName = (String) b.get("USER_NAME");
+                mOtherUsePhotoUri =  Uri.parse((String) b.get("USER_PHOTO"));
+
+                //Coordinates
+                mMyLat = (double) b.get("YOUR_LAT");
+                mMyLng = (double) b.get("YOUR_LON");
+                mOtherUserLat = (double) b.get("OTHER_USER_LAT");
+                mOtherUserLng = (double) b.get("OTHER_USER_LON");;
             }
         } else {
-            mDisplayName = PreferenceManager.getDefaultSharedPreferences(this).getString("DISPLAY_NAME", "defaultStringIfNothingFound");
-            mPhotoUri = Uri.parse(PreferenceManager.getDefaultSharedPreferences(this).getString("PHOTO_URL", "defaultStringIfNothingFound"));
+            mOtherUserDisplayName = PreferenceManager.getDefaultSharedPreferences(this).getString("DISPLAY_NAME", "defaultStringIfNothingFound");
+            mOtherUsePhotoUri = Uri.parse(PreferenceManager.getDefaultSharedPreferences(this).getString("PHOTO_URL", "defaultStringIfNothingFound"));
         }
+    }
 
 
-        mContactName = (TextView) findViewById(R.id.contactName);
-        mContactImage = (ImageView) findViewById(R.id.contactImage);
+    private void setUpMediaPlayer() {
+        // user selected sound
+        int rawSound = R.raw.bellsbellsbells;
+        // Create player
+        mMediaPlayer = MediaPlayer.create(getApplicationContext(), rawSound);
+        mMediaPlayer.setLooping(true);
+        mMediaPlayer.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
+    }
 
-        if(mPhotoUri != null){
-            // change image size
-            tempPhoto =  mPhotoUri.toString().replace("s96-c", "s200-c");
-            setNameAndPic();
+    private void checkIfServicesOK() {
+        if (servicesOK()) {
+            setContentView(R.layout.activity_alert_2);
+
+            if (initMap()) {
+                goToLocation(mMyLat, mMyLng, 15);
+
+            } else {
+                Toast.makeText(AlertActivity.this, "Map not connected!", Toast.LENGTH_SHORT).show();
+            }
+
+        } else {
+            onDestroy();;
         }
+    }
 
-
+    private void setScreenToBeOn() {
+        // show if locked http://stackoverflow.com/questions/14554616/start-an-activity-even-when-android-phone-is-in-locked-mode-on-lock-screen
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+                + WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD|
+                + WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED|
+                + WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
     }
 
     public void setNameAndPic(){
         // set name and image
-        mContactName.setText("   " + mDisplayName);
-        Glide.with(this).load(Uri.parse(tempPhoto)).into(mContactImage);
+        /*mContactName.setText("   " + mOtherUserDisplayName);
+        Glide.with(this).load(Uri.parse(mOtherUseTempPhoto)).into(mContactImage);*/
 
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        isInFront = true;
-        PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit().putBoolean("ALERT_IS_INFRONT", isInFront).apply();
+        mIsInFront = true;
+        PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit().putBoolean("ALERT_IS_INFRONT", mIsInFront).apply();
         Toast.makeText(AlertActivity.this, "AlertActivity is in front", Toast.LENGTH_SHORT).show();
         mMediaPlayer.start();
     }
@@ -131,20 +149,20 @@ public class AlertActivity extends AppCompatActivity
     @Override
     protected void onPause() {
         super.onPause();
-        //mMediaPlayer.stop();
-        /*mMediaPlayer.release();
-        mMediaPlayer = null;*/
-        isInFront = false;
-        PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit().putBoolean("ALERT_IS_INFRONT", isInFront).apply();
+        mIsInFront = false;
+        PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit().putBoolean("ALERT_IS_INFRONT", mIsInFront).apply();
         Toast.makeText(AlertActivity.this, "AlertActivity is NOT in front", Toast.LENGTH_SHORT).show();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mMediaPlayer.stop();
-        mMediaPlayer.release();
-        mMediaPlayer = null;
+
+        if(mMediaPlayer != null){
+            mMediaPlayer.stop();
+            mMediaPlayer.release();
+            mMediaPlayer = null;
+        }
     }
 
     public void stopActivity(View view) {
@@ -205,26 +223,62 @@ public class AlertActivity extends AppCompatActivity
                     mMap = googleMap;
                     mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
                     mMap.getUiSettings().setZoomControlsEnabled(false);
-                    goToLocation(STOCKHOLM_LAT, STOCKHOLM_LNG, 18);
+                    goToLocation(mMyLat, mMyLng, 18);
                 }
             });
+
 
         }
         return (mMap != null);
     }
 
     // long, lat, zoom,
-    private void goToLocation(double lat, double lng, float zoom) {
+    private void goToLocation(final double lat, double lng, float zoom) {
 
         LatLng latLng = new LatLng(lat, lng);
         CameraUpdate update = CameraUpdateFactory.newLatLngZoom(latLng, zoom);
         mMap.moveCamera(update);
 
-        // Add Marker to Map
-        MarkerOptions option = new MarkerOptions();
-        option.title("My Location");;
-        option.position(latLng);
-        Marker currentMarker = mMap.addMarker(option);
-        currentMarker.showInfoWindow();
+
+        mYourDisplayName = PreferenceManager.getDefaultSharedPreferences(AlertActivity.this).getString("DISPLAY_NAME", "defaultStringIfNothingFound");
+
+
+
+        Marker you = mMap.addMarker(new MarkerOptions()
+                .position(new LatLng(mMyLat, mMyLng))
+                .anchor(0.5f, 0.5f)
+                .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_my_location_black_18dp)));
+
+
+        Marker otherUser = mMap.addMarker(new MarkerOptions()
+                .position(new LatLng(mOtherUserLat, mOtherUserLng))
+                .anchor(0.5f, 0.5f));
+
+
+        mMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
+            @Override
+            public View getInfoWindow(Marker marker) {
+                return null;
+            }
+
+            @Override
+            public View getInfoContents(Marker marker) {
+                View v = getLayoutInflater().inflate(R.layout.map_contact_window, null);
+                TextView infoContactName = (TextView) v.findViewById(R.id.contactName);
+                ImageView infoContactImage = (ImageView) v.findViewById(R.id.contactImage);
+
+                if(marker.getPosition().latitude != mMyLat){
+                    infoContactName.setText(mOtherUserDisplayName);
+                    Glide.with(AlertActivity.this).load(Uri.parse(mOtherUseTempPhoto)).into(infoContactImage);
+                    return v;
+                } else {
+                    return null;
+                }
+            }
+        });
+
+        otherUser.showInfoWindow();
     }
+
+
 }

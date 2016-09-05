@@ -38,14 +38,18 @@ public class GeoFireService extends Service
     private static final String TAG = "GeoFireService";
 
     static public GeoFire mGeoFire;
-    public String mUserUid, userName, userPhotoUri;
-    public GeoQuery geoQuery;
-    public DatabaseReference firebaseProfiles, onlineUsers;
+    public String mUserUid, mUserName, mUserPhotoUri;
+    public GeoQuery mGeoQuery;
+    public DatabaseReference mFireBaseProfiles, mOnlineUsers;
 
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
-    private static final int REQUEST_CODE_LOCATION = 2;
+    //private static final int REQUEST_CODE_LOCATION = 2;
     private final String LOG_TAG = "TestApp";
+
+    boolean clientIsOnline;
+
+    ValueEventListener mFireBaseProfilesListener, mClientOnlineListener;
 
     //private ArrayList<String> contacts;
 
@@ -53,30 +57,13 @@ public class GeoFireService extends Service
     @Override
     public void onCreate() {
         super.onCreate();
-
         //contacts = new ArrayList<>();
+        checkUserUid();
+        initFireBaseAndGeoFire();
+        buildGoogleApiClient();
+    }
 
-        // get user info
-        mUserUid = PreferenceManager.getDefaultSharedPreferences(this).getString("USERUID", "defaultStringIfNothingFound");
-
-        if (mUserUid.equals("defaultStringIfNothingFound") || mUserUid.isEmpty() || mUserUid == null){
-
-            Intent stopGeoFireService = new Intent(getBaseContext(), GeoFireService.class);
-            stopService(stopGeoFireService);
-        }
-
-        // init Firebase database
-        FirebaseDatabase dataRef = FirebaseDatabase.getInstance();
-        firebaseProfiles = dataRef.getReference("profiles");
-
-        /*onlineUsers = dataRef.getReference("onlineUsers");
-        onlineUsers.setValue(mUserUid);
-        onlineUsers.onDisconnect().removeValue();*/
-
-        // init Geofire
-        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("userLocal");
-        mGeoFire = new GeoFire(ref);
-
+    private void buildGoogleApiClient() {
         // Build GoogleApiClient
         mGoogleApiClient = new GoogleApiClient.Builder(GeoFireService.this)
                 .addApi(LocationServices.API)
@@ -87,14 +74,46 @@ public class GeoFireService extends Service
         mGoogleApiClient.connect();
     }
 
+    private void initFireBaseAndGeoFire() {
+        // init Firebase database
+        FirebaseDatabase dataRef = FirebaseDatabase.getInstance();
+        mFireBaseProfiles = dataRef.getReference("profiles");
 
+        mOnlineUsers = dataRef.getReference("onlineUsers");
+        mOnlineUsers.child(mUserUid).setValue(true);
+        mOnlineUsers.child(mUserUid).onDisconnect().setValue(false);
 
+        // init Geofire
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("userLocal");
+        mGeoFire = new GeoFire(ref);
+    }
 
+    private void checkUserUid() {
+        // get user info
+        mUserUid = PreferenceManager.getDefaultSharedPreferences(this).getString("USERUID", "defaultStringIfNothingFound");
+
+        if (mUserUid.equals("defaultStringIfNothingFound") || mUserUid.isEmpty() || mUserUid == null){
+
+            Intent stopGeoFireService = new Intent(getBaseContext(), GeoFireService.class);
+            stopService(stopGeoFireService);
+        }
+    }
 
 
     public void onDestroy() {
         mGoogleApiClient.disconnect();
         mGeoFire.removeLocation(mUserUid);
+
+        if (mClientOnlineListener != null){
+            mOnlineUsers.removeEventListener(mClientOnlineListener);
+        }
+        if (mFireBaseProfilesListener != null){
+            mFireBaseProfiles.removeEventListener(mFireBaseProfilesListener);
+        }
+        if (mGeoQuery != null) {
+            mGeoQuery.removeAllListeners();
+        }
+
         Toast.makeText(this, "GeoFireService Stopped", Toast.LENGTH_LONG).show();
         Log.d(TAG, "onDestroy");
     }
@@ -106,15 +125,14 @@ public class GeoFireService extends Service
     }
 
 
-
-
     // local
     @Override
     public void onConnected(@Nullable Bundle bundle) {
         mLocationRequest = LocationRequest.create();
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        mLocationRequest.setInterval(5000); // Update every 5 seconds (in ms)
+        mLocationRequest.setInterval(10000); // Update every 10 seconds (in ms)
 
+        // If device does not have location permission, open SplashActivity
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             Intent intent = new Intent(getBaseContext(), SplashActivity.class);
             startActivity(intent);
@@ -131,18 +149,18 @@ public class GeoFireService extends Service
     }
 
     @Override
-    public void onLocationChanged(Location location) {
-        Log.i(LOG_TAG, location.toString());
+    public void onLocationChanged(final Location myLocation) {
+        Log.i(LOG_TAG, myLocation.toString());
 
-        Toast.makeText(GeoFireService.this, "Your location is." + location.getLatitude() + " " + location.getLongitude(), Toast.LENGTH_SHORT).show();
+        Toast.makeText(GeoFireService.this, "Your location is." + myLocation.getLatitude() + " " + myLocation.getLongitude(), Toast.LENGTH_SHORT).show();
 
         // get user set pref distance
-        double geoFireDistance = 0.1;
+        double geoFireDistance = 0.1; // 100 m
 
-        geoQuery = mGeoFire.queryAtLocation(new GeoLocation(location.getLatitude(), location.getLongitude()), geoFireDistance);
+        mGeoQuery = mGeoFire.queryAtLocation(new GeoLocation(myLocation.getLatitude(), myLocation.getLongitude()), geoFireDistance);
 
         // update Geofire
-        mGeoFire.setLocation(mUserUid, new GeoLocation(location.getLatitude(), location.getLongitude()), new GeoFire.CompletionListener() {
+        mGeoFire.setLocation(mUserUid, new GeoLocation(myLocation.getLatitude(), myLocation.getLongitude()), new GeoFire.CompletionListener() {
             @Override
             public void onComplete(String key, DatabaseError error) {
                 if (error != null) {
@@ -154,26 +172,24 @@ public class GeoFireService extends Service
         });
 
         // GeoQueryEventListener
-        geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
+        mGeoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
             @Override
-            public void onKeyEntered(String key, GeoLocation location) {
-                System.out.println(String.format("Key %s entered the search area at [%f,%f]", key, location.latitude, location.longitude));
+            public void onKeyEntered(String key, GeoLocation otherUserLocation) {
+                System.out.println(String.format("Key %s entered the search area at [%f,%f]", key, otherUserLocation.latitude, otherUserLocation.longitude));
 
-                Toast.makeText(GeoFireService.this, String.format("Key %s entered the search area at [%f,%f]", key, location.latitude, location.longitude), Toast.LENGTH_SHORT).show();
-
-
-                // check that key is not you and that alertActivityActive is not currently open
-                if (!key.matches(mUserUid)) {
-                    //Toast.makeText(MainActivity.this, String.format("Key %s entered the search area at [%f,%f]", key, location.latitude, location.longitude), Toast.LENGTH_SHORT).show();
+                Toast.makeText(GeoFireService.this, String.format("Key %s entered the search area at [%f,%f]", key, otherUserLocation.latitude, otherUserLocation.longitude), Toast.LENGTH_SHORT).show();
 
 
+                // check that key is not you, and key is online and AlertActivity is not visible
+                if (!key.matches(mUserUid) && keyIsOnline(key) && !PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getBoolean("ALERT_IS_INFRONT", false)) {
 
-                    firebaseProfiles.child(key).addValueEventListener(new ValueEventListener() {
+
+                    mFireBaseProfiles.child(key).addValueEventListener(mFireBaseProfilesListener = new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
                             Profile profile = dataSnapshot.getValue(Profile.class);
-                            userName = profile.getName();
-                            userPhotoUri = profile.getPhotoUri();
+                            mUserName = profile.getName();
+                            mUserPhotoUri = profile.getPhotoUri();
                         }
 
                         @Override
@@ -183,14 +199,22 @@ public class GeoFireService extends Service
                     });
 
 
-                    // if AlertActivity is not visible & userName & userPhotoUri is not null, open Alert
-                    if (!PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getBoolean("ALERT_IS_INFRONT", false)
-                            && userName != null && userPhotoUri !=null
+                    // if mUserName & mUserPhotoUri is not null, open Alert
+                    if (mUserName != null && mUserPhotoUri !=null
                             /*&& !contacts.contains(key)*/) {
                         Intent intent = new Intent(getBaseContext(), AlertActivity.class);
                         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        intent.putExtra("USER_NAME", userName);
-                        intent.putExtra("USER_PHOTO", userPhotoUri);
+                        intent.putExtra("USER_NAME", mUserName);
+                        intent.putExtra("USER_PHOTO", mUserPhotoUri);
+
+                        // my coordinates
+                        intent.putExtra("YOUR_LAT", myLocation.getLatitude());
+                        intent.putExtra("YOUR_LON", myLocation.getLongitude());
+
+                        // other user coordinates
+                        intent.putExtra("OTHER_USER_LAT", otherUserLocation.latitude);
+                        intent.putExtra("OTHER_USER_LON", otherUserLocation.longitude);
+
                         startActivity(intent);
                         //contacts.add(key);
                         //Toast.makeText(GeoFireService.this, key + " added to contacts", Toast.LENGTH_SHORT).show();
@@ -222,10 +246,32 @@ public class GeoFireService extends Service
 
     }
 
+    private boolean keyIsOnline(String key) {
+
+        //check that key-client is online
+        mOnlineUsers.child(key).addValueEventListener(mClientOnlineListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot != null){
+                    clientIsOnline = dataSnapshot.getValue(boolean.class);
+                } else
+                    clientIsOnline = false;
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+        return clientIsOnline;
+    };
+
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
         Log.i(LOG_TAG, "GoogleApiClient connection has failed");
 
     }
+
 
 }

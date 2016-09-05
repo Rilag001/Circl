@@ -35,30 +35,15 @@
                 android:layout_marginBottom="4dp"
                 android:id="@+id/basicprofile">
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:layout_marginTop="85dp"
-                    android:layout_marginBottom="40dp">
-
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="85dp"
+                        android:layout_marginBottom="30dp"
                         android:id="@+id/profile_name"
                         android:hint="@string/hint_name"
                         android:layout_gravity="center_horizontal"
                         android:textSize="25sp"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:id="@+id/profile_email"
-                        android:hint="@string/hint_email"
-                        android:layout_gravity="center_horizontal"
-                        android:textSize="12sp"/>
-
-                </LinearLayout>
 
             </android.support.v7.widget.CardView>
 
@@ -87,8 +72,9 @@
                         android:text="About me"/>
 
                     <ImageButton
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:scaleType="fitCenter"
                         android:background="@android:color/white"
                         android:src="@drawable/pencil_fill"
                         android:id="@+id/editAboutMeButton"
@@ -109,50 +95,6 @@
 
             </android.support.v7.widget.CardView>
 
-            <android.support.v7.widget.CardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="8dp"
-                android:layout_marginLeft="8dp"
-                android:layout_marginBottom="4dp"
-                android:layout_marginTop="4dp"
-                android:id="@+id/InterestsCard">
-
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:layout_margin="16dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textStyle="bold"
-                        android:textSize="14sp"
-                        android:layout_marginTop="8dp"
-                        android:id="@+id/InterestsTitle"
-                        android:text="Interests"/>
-
-                    <ImageButton
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="@android:color/white"
-                        android:src="@drawable/pencil_fill"
-                        android:layout_alignTop="@+id/InterestsTitle"
-                        android:layout_alignParentRight="true"
-                        android:layout_alignParentEnd="true"/>
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_marginTop="8dp"
-                        android:layout_height="wrap_content"
-                        android:layout_below="@id/InterestsTitle"
-                        android:text=""
-                        android:id="@+id/InterestsInput"/>
-
-                </RelativeLayout>
-
-            </android.support.v7.widget.CardView>
 
         </LinearLayout>
     </LinearLayout>

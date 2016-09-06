@@ -26,7 +26,7 @@ import se.rickylagerkvist.circl.Fragments.AchievementsFragment;
 import se.rickylagerkvist.circl.Fragments.ChatFragment;
 import se.rickylagerkvist.circl.Fragments.ProfileFragment;
 
-public class Main2Activity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity {
 
     private static final int REQUEST_CODE_LOCATION = 2;
     FloatingActionButton mFab;
@@ -71,22 +71,19 @@ public class Main2Activity extends AppCompatActivity {
             PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit().putString("PHOTO_URL", null).apply();
 
             // Start LoginActivity
-            Intent startLoginActivity = new Intent(Main2Activity.this, LoginActivity.class);
+            Intent startLoginActivity = new Intent(MainActivity.this, LoginActivity.class);
             startActivity(startLoginActivity);
 
         } else if (id == R.id.stop_geoTacking) {
-            Intent stopService = new Intent(Main2Activity.this, GeoFireService.class);
+            Intent stopService = new Intent(MainActivity.this, GeoFireService.class);
             stopService(stopService);
 
-            String mUserUid = PreferenceManager.getDefaultSharedPreferences(this).getString("USERUID", "defaultStringIfNothingFound");
-            GeoFireService.mGeoFire.removeLocation(mUserUid);
-
         } else  if (id == R.id.start_geoTacking) {
-            Intent startService = new Intent(Main2Activity.this, GeoFireService.class);
+            Intent startService = new Intent(MainActivity.this, GeoFireService.class);
             startService(startService);
 
         } else  if (id == R.id.settings) {
-            Intent startSettingsActivity = new Intent(Main2Activity.this, SettingsActivity.class);
+            Intent startSettingsActivity = new Intent(MainActivity.this, SettingsActivity.class);
             startActivity(startSettingsActivity);
         }
 
@@ -192,7 +189,7 @@ public class Main2Activity extends AppCompatActivity {
         findViewById(R.id.fab).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View v) {
-                Intent startAlertActivity = new Intent(Main2Activity.this, AlertActivity.class);
+                Intent startAlertActivity = new Intent(MainActivity.this, AlertActivity.class);
                 startActivity(startAlertActivity);
 
                 /*coordinatorLayout.postDelayed(new Runnable() {

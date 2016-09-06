@@ -1,44 +1,82 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                xmlns:app="http://schemas.android.com/apk/res-auto"
-                android:orientation="vertical"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@android:color/transparent">
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:fitsSystemWindows="true">
 
     <fragment android:layout_height="match_parent"
               android:layout_width="match_parent"
               android:id="@+id/map"
               android:name="com.google.android.gms.maps.SupportMapFragment"/>
 
+    <android.support.v7.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:id="@+id/picAndName">
 
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/contactImage"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="16dp"
+                android:layout_marginLeft="16dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginRight="4dp"
+                android:layout_marginEnd="4dp"
+                android:layout_centerVertical="true"
+                android:layout_width="96dp"
+                android:layout_height="96dp"
+                android:src="@color/colorPrimary"/>
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/otherUserName"
+                android:textSize="25sp"
+                android:layout_centerVertical="true"
+                android:layout_toRightOf="@+id/contactImage"
+                android:layout_toEndOf="@+id/contactImage"/>
+
+        </RelativeLayout>
+
+    </android.support.v7.widget.CardView>
 
     <android.support.design.widget.FloatingActionButton
         android:layout_width="wrap_content"
-        app:fabSize="normal"
         android:layout_height="wrap_content"
+        app:fabSize="normal"
+        android:src="@android:drawable/stat_notify_call_mute"
+        android:onClick="muteMusic"
         android:layout_margin="@dimen/fab_margin"
-        android:src="@drawable/common_full_open_on_phone"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:onClick="stopActivity"
-        android:layout_alignParentStart="true"
-        android:id="@+id/view"/>
+        android:layout_gravity="bottom|center"/>
 
     <android.support.design.widget.FloatingActionButton
-        android:layout_width="wrap_content"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
         app:fabSize="normal"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/fab_margin"
-        android:background="@color/color1"
-        android:onClick="stopApp"
-        android:src="@drawable/common_full_open_on_phone"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"/>
+        app:backgroundTint="@color/colorPrimary"
+        android:layout_marginStart="-75dp"
+        android:layout_marginLeft="-75dp"
+        android:layout_marginBottom="-75dp"
+        android:layout_gravity="bottom|start"
+        android:id="@+id/stopActivity"/>
+
+    <android.support.design.widget.FloatingActionButton
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        app:fabSize="normal"
+        android:layout_marginEnd="-75dp"
+        android:layout_marginRight="-75dp"
+        android:layout_marginBottom="-75dp"
+        android:layout_gravity="bottom|end"
+        app:backgroundTint="@color/color1"
+        android:id="@+id/stopApp"/>
 
 
-
-</RelativeLayout>
+</android.support.design.widget.CoordinatorLayout>

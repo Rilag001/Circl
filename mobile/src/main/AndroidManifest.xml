@@ -61,29 +61,33 @@
                 <action android:name="android.intent.action.PACKAGE_ADDED" />
                 <data android:scheme="package" />
             </intent-filter>
+        </receiver>
 
+        <receiver
+            android:process=":remote"
+            android:name=".Alarm">
         </receiver>
 
         <service android:name=".GeoFireService">
         </service>
 
-        <activity android:name=".Main2Activity">
+        <activity android:name=".MainActivity">
         </activity>
         <activity
             android:name=".SettingsActivity"
             android:label="@string/title_activity_settings">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="se.rickylagerkvist.circl.Main2Activity"/>
+                android:value=".MainActivity"/>
         </activity>
         <activity
             android:name=".EditAboutMeActivty"
             android:label="@string/title_activity_edit_about_me_activty"
-            android:parentActivityName=".Main2Activity"
+            android:parentActivityName=".MainActivity"
             android:theme="@style/AppTheme">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="se.rickylagerkvist.circl.Main2Activity"/>
+                android:value=".MainActivity"/>
         </activity>
 
         <meta-data

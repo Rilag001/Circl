@@ -46,9 +46,9 @@ public class ProfileFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_profile, container, false);
 
+        getUserInfo();
         // database ref
         myProfileRef = FirebaseDatabase.getInstance().getReference("profiles").child(mUserUid).child("aboutMe");
-        getUserInfo();
         initUI(view);
 
 

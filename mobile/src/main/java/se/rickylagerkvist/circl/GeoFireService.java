@@ -40,10 +40,10 @@ public class GeoFireService extends Service
     static public GeoFire mGeoFire;
     public String mUserUid, mUserName, mUserPhotoUri;
     public GeoQuery mGeoQuery;
-    public DatabaseReference mFireBaseProfiles, mOnlineUsers;
+    public DatabaseReference mFireBaseProfiles, mIWantToEngage;
+    public static DatabaseReference mOnlineUsers;
 
     private GoogleApiClient mGoogleApiClient;
-    private LocationRequest mLocationRequest;
     //private static final int REQUEST_CODE_LOCATION = 2;
     private final String LOG_TAG = "TestApp";
 
@@ -52,7 +52,6 @@ public class GeoFireService extends Service
     ValueEventListener mFireBaseProfilesListener, mClientOnlineListener;
 
     //private ArrayList<String> contacts;
-
 
     @Override
     public void onCreate() {
@@ -82,6 +81,8 @@ public class GeoFireService extends Service
         mOnlineUsers = dataRef.getReference("onlineUsers");
         mOnlineUsers.child(mUserUid).setValue(true);
         mOnlineUsers.child(mUserUid).onDisconnect().setValue(false);
+
+        mIWantToEngage = FirebaseDatabase.getInstance().getReference("mEstablishedConnection").child(mUserUid);
 
         // init Geofire
         DatabaseReference ref = FirebaseDatabase.getInstance().getReference("userLocal");
@@ -128,16 +129,16 @@ public class GeoFireService extends Service
     // local
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-        mLocationRequest = LocationRequest.create();
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        mLocationRequest.setInterval(10000); // Update every 10 seconds (in ms)
+        LocationRequest locationRequest = LocationRequest.create();
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        locationRequest.setInterval(10000); // Update every 10 seconds (in ms)
 
         // If device does not have location permission, open SplashActivity
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             Intent intent = new Intent(getBaseContext(), SplashActivity.class);
             startActivity(intent);
         } else {
-            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, locationRequest, this);
         }
 
     }
@@ -152,7 +153,9 @@ public class GeoFireService extends Service
     public void onLocationChanged(final Location myLocation) {
         Log.i(LOG_TAG, myLocation.toString());
 
-        Toast.makeText(GeoFireService.this, "Your location is." + myLocation.getLatitude() + " " + myLocation.getLongitude(), Toast.LENGTH_SHORT).show();
+        mIWantToEngage.setValue("");
+
+        //Toast.makeText(GeoFireService.this, "Your location is." + myLocation.getLatitude() + " " + myLocation.getLongitude(), Toast.LENGTH_SHORT).show();
 
         // get user set pref distance
         double geoFireDistance = 0.1; // 100 m
@@ -177,7 +180,7 @@ public class GeoFireService extends Service
             public void onKeyEntered(String key, GeoLocation otherUserLocation) {
                 System.out.println(String.format("Key %s entered the search area at [%f,%f]", key, otherUserLocation.latitude, otherUserLocation.longitude));
 
-                Toast.makeText(GeoFireService.this, String.format("Key %s entered the search area at [%f,%f]", key, otherUserLocation.latitude, otherUserLocation.longitude), Toast.LENGTH_SHORT).show();
+                //Toast.makeText(GeoFireService.this, String.format("Key %s entered the search area at [%f,%f]", key, otherUserLocation.latitude, otherUserLocation.longitude), Toast.LENGTH_SHORT).show();
 
 
                 // check that key is not you, and key is online and AlertActivity is not visible
@@ -206,6 +209,7 @@ public class GeoFireService extends Service
                         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         intent.putExtra("USER_NAME", mUserName);
                         intent.putExtra("USER_PHOTO", mUserPhotoUri);
+                        intent.putExtra("USER_KEY", key);
 
                         // my coordinates
                         intent.putExtra("YOUR_LAT", myLocation.getLatitude());
@@ -272,6 +276,4 @@ public class GeoFireService extends Service
         Log.i(LOG_TAG, "GoogleApiClient connection has failed");
 
     }
-
-
 }

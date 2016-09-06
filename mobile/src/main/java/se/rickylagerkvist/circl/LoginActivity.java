@@ -74,7 +74,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                 FirebaseUser user = firebaseAuth.getCurrentUser();
                 if (user != null) {
                     // User is signed in
-                    Intent startMainActivity = new Intent(LoginActivity.this, Main2Activity.class);
+                    Intent startMainActivity = new Intent(LoginActivity.this, MainActivity.class);
                     startMainActivity.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     startMainActivity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(startMainActivity);
@@ -152,7 +152,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                         }
 
                         // start MainActivity
-                        Intent startMainActivity = new Intent(LoginActivity.this, Main2Activity.class);
+                        Intent startMainActivity = new Intent(LoginActivity.this, MainActivity.class);
                         startMainActivity.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         startMainActivity.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
                         startActivity(startMainActivity);

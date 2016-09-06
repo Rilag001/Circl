@@ -42,7 +42,7 @@
             android:layout_weight="1"
             style="?android:attr/buttonBarButtonStyle"
             android:background="@color/colorAccent"
-            android:onClick="stopActivity"
+            android:onClick="engageWithUser"
             android:textColor="@android:color/white"
             android:text="Yes"
             android:id="@+id/button"/>
@@ -53,7 +53,7 @@
             android:layout_weight="1"
             style="?android:attr/buttonBarButtonStyle"
             android:background="@color/color1"
-            android:onClick="stopApp"
+            android:onClick="doNotEngageWithUser"
             android:textColor="@android:color/white"
             android:text="No"
             />

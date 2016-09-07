@@ -19,18 +19,11 @@ public class Alarm extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
 
-        //String mUserUid = PreferenceManager.getDefaultSharedPreferences(context).getString("USERUID", "defaultStringIfNothingFound");
-
         PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         PowerManager.WakeLock wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "");
         wl.acquire();
 
-        // Put here YOUR code.
-        //GeoFireService.setOnlineTrue(context);
-
-        //DatabaseReference mOnlineUsers = FirebaseDatabase.getInstance().getReference("onlineUsers");
-        //mOnlineUsers.child(mUserUid).setValue(true);
-
+        // execution code
         Intent startGeoFireService = new Intent (context, GeoFireService.class);
         context.startService(startGeoFireService);
 

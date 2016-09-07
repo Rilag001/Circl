@@ -112,7 +112,7 @@ public class MainActivity extends AppCompatActivity {
         models.add(
                 new NavigationTabBar.Model.Builder(
                         getResources().getDrawable(R.drawable.rewards_trophy_line),
-                        R.color.colorPrimaryDark)
+                        R.color.colorPrimary)
                         //.selectedIcon(getResources().getDrawable(R.drawable.rewards_trophy_fill))
                         .title(getString(R.string.Achievements))
                         .badgeTitle("NEW")
@@ -121,7 +121,7 @@ public class MainActivity extends AppCompatActivity {
         models.add(
                 new NavigationTabBar.Model.Builder(
                         getResources().getDrawable(R.drawable.chat_bubble_square_line),
-                        R.color.colorPrimaryDark)
+                        R.color.colorPrimary)
                         //.selectedIcon(getResources().getDrawable(R.drawable.chat_bubble_square_fill))
                         .title(getString(R.string.Chat))
                         .badgeTitle("NEW")
@@ -130,7 +130,7 @@ public class MainActivity extends AppCompatActivity {
         models.add(
                 new NavigationTabBar.Model.Builder(
                         getResources().getDrawable(R.drawable.user_chat_line),
-                        R.color.colorPrimaryDark)
+                        R.color.colorPrimary)
                         //.selectedIcon(getResources().getDrawable(R.drawable.user_chat_fill))
                         .title(getString(R.string.Profile))
                         .badgeTitle("NEW")

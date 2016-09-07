@@ -38,9 +38,9 @@ public class GeoFireService extends Service
     private static final String TAG = "GeoFireService";
 
     static public GeoFire mGeoFire;
-    public String mUserUid, mUserName, mUserPhotoUri;
-    public GeoQuery mGeoQuery;
-    public DatabaseReference mFireBaseProfiles, mIWantToEngage;
+    private String mUserUid, mUserName, mUserPhotoUri, mUserEngageData;
+    private GeoQuery mGeoQuery;
+    private DatabaseReference mFireBaseProfiles, mIWantToEngage, mUserWantsToEngage;
     public static DatabaseReference mOnlineUsers;
 
     private GoogleApiClient mGoogleApiClient;
@@ -49,7 +49,7 @@ public class GeoFireService extends Service
 
     boolean clientIsOnline;
 
-    ValueEventListener mFireBaseProfilesListener, mClientOnlineListener;
+    ValueEventListener mFireBaseProfilesListener, mClientOnlineListener, mWantToEngageListener;
 
     //private ArrayList<String> contacts;
 
@@ -114,6 +114,11 @@ public class GeoFireService extends Service
         if (mGeoQuery != null) {
             mGeoQuery.removeAllListeners();
         }
+        if (mWantToEngageListener != null) {
+            mUserWantsToEngage.removeEventListener(mWantToEngageListener);
+        }
+
+        mOnlineUsers.child(mUserUid).setValue(false);
 
         Toast.makeText(this, "GeoFireService Stopped", Toast.LENGTH_LONG).show();
         Log.d(TAG, "onDestroy");
@@ -182,9 +187,24 @@ public class GeoFireService extends Service
 
                 //Toast.makeText(GeoFireService.this, String.format("Key %s entered the search area at [%f,%f]", key, otherUserLocation.latitude, otherUserLocation.longitude), Toast.LENGTH_SHORT).show();
 
+                mUserWantsToEngage = FirebaseDatabase.getInstance().getReference("mEstablishedConnection").child(key);
+                mUserWantsToEngage.addValueEventListener(mWantToEngageListener = new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        mUserEngageData = dataSnapshot.getValue(String.class);
+                    }
 
-                // check that key is not you, and key is online and AlertActivity is not visible
-                if (!key.matches(mUserUid) && keyIsOnline(key) && !PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getBoolean("ALERT_IS_INFRONT", false)) {
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+
+                // check that key is not you, and key is online, lertActivity is not visible and mUserWantsToEngage is ""
+                if (!key.matches(mUserUid)
+                        && keyIsOnline(key)
+                        && !PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getBoolean("ALERT_IS_INFRONT", false)
+                        && mUserEngageData.equals("")) {
 
 
                     mFireBaseProfiles.child(key).addValueEventListener(mFireBaseProfilesListener = new ValueEventListener() {

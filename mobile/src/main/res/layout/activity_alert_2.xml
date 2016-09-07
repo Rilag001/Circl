@@ -51,8 +51,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:fabSize="normal"
-        android:src="@android:drawable/stat_notify_call_mute"
-        android:onClick="muteMusic"
+        android:src="@drawable/ic_volume_off_white_48dp"
+        android:id="@+id/muteFab"
         android:layout_margin="@dimen/fab_margin"
         android:layout_gravity="bottom|center"/>
 
@@ -65,7 +65,7 @@
         android:layout_marginLeft="-75dp"
         android:layout_marginBottom="-75dp"
         android:layout_gravity="bottom|start"
-        android:id="@+id/stopActivity"/>
+        android:id="@+id/stopActivityFab"/>
 
     <android.support.design.widget.FloatingActionButton
         android:layout_width="150dp"
@@ -76,7 +76,7 @@
         android:layout_marginBottom="-75dp"
         android:layout_gravity="bottom|end"
         app:backgroundTint="@color/color1"
-        android:id="@+id/stopApp"/>
+        android:id="@+id/stopAppFab"/>
 
 
 </android.support.design.widget.CoordinatorLayout>

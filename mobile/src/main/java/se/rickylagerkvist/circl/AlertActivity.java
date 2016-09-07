@@ -10,9 +10,7 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.view.MotionEventCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
@@ -35,15 +33,21 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
+
+import java.util.HashMap;
+
+import se.rickylagerkvist.circl.Data.PersonIMet;
 
 public class AlertActivity extends AppCompatActivity
         implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener{
 
-    private String mYourDisplayName, mOtherUserDisplayName, mOtherUseTempPhoto, mYourTempPhoto, mUserKey, mUserUid;
-    private Uri mOtherUsePhotoUri, mYourPhotoUri;
+    private String mOtherUserDisplayName, mOtherUseTempPhoto, mOtherUserUidKey, mMyUidKey;
+    private Uri mOtherUsePhotoUri;
     private boolean mIsInFront;
+    private int mNrAmountOfPeopleIMet;
 
     private MediaPlayer mMediaPlayer;
 
@@ -54,12 +58,14 @@ public class AlertActivity extends AppCompatActivity
     private TextView mName, mConversationStarter;
     private ImageView mContactImage;
 
-    private FloatingActionButton mStopActivity, mStopApp;
+    private FloatingActionButton mStopActivity, mStopApp, mMuteSound;
 
-    private DatabaseReference mIWantToEngage, mUserWantsToEngage, mOnlineUsers;
-    private ValueEventListener mWantToEngageListener;
+    private DatabaseReference mIWantToEngage, mUserWantsToEngage, mOnlineUsers, mPeopleIMet, mAmountOfPeopleIMet;
+    private ValueEventListener mWantToEngageListener, mAmountOfPeopleListener;
 
     Alarm mAlarm = new Alarm();
+
+    private PersonIMet person;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,14 +76,52 @@ public class AlertActivity extends AppCompatActivity
         checkIfServicesOK();
         setUpMediaPlayer();
         initUi();
+        initFireDataBase();
+
+        // FloatingActionButtons
+        mStopActivity.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //engageWithUser();
+                mIWantToEngage.setValue("true");
+            }
+        });
+
+        mStopApp.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //doNotEngageWithUser();
+                mIWantToEngage.setValue("false");
+            }
+        });
+
+        mMuteSound.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (mMediaPlayer.isPlaying()){
+                    mMediaPlayer.pause();
+                    mMuteSound.setImageResource(R.drawable.ic_volume_up_white_48dp);
+                } else {
+                    mMediaPlayer.start();
+                    mMuteSound.setImageResource(R.drawable.ic_volume_off_white_48dp);
+                }
+
+            }
+        });
+    }
+
+    private void initFireDataBase() {
 
         // set that you want to engageWithUser with them
-        mUserUid = PreferenceManager.getDefaultSharedPreferences(this).getString("USERUID", "defaultStringIfNothingFound");
-        mIWantToEngage = FirebaseDatabase.getInstance().getReference("mEstablishedConnection").child(mUserUid);
+        mMyUidKey = PreferenceManager.getDefaultSharedPreferences(this).getString("USERUID", "defaultStringIfNothingFound");
+        mIWantToEngage = FirebaseDatabase.getInstance().getReference("mEstablishedConnection").child(mMyUidKey);
         //mIWantToEngage.setValue("");
 
+        mPeopleIMet = FirebaseDatabase.getInstance().getReference("peopleIMet").child(mMyUidKey).child(mOtherUserUidKey);
+        mAmountOfPeopleIMet = FirebaseDatabase.getInstance().getReference("amountOfPeopleIMet").child(mMyUidKey);
+
         // Check if they want to engageWithUser with you
-        mUserWantsToEngage = FirebaseDatabase.getInstance().getReference("mEstablishedConnection").child(mUserKey);
+        mUserWantsToEngage = FirebaseDatabase.getInstance().getReference("mEstablishedConnection").child(mOtherUserUidKey);
         mUserWantsToEngage.addValueEventListener(mWantToEngageListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -88,8 +132,6 @@ public class AlertActivity extends AppCompatActivity
                 } else if (data.equalsIgnoreCase("true")) {
                     engageWithUser();
                 }
-
-
             }
 
             @Override
@@ -97,48 +139,13 @@ public class AlertActivity extends AppCompatActivity
 
             }
         });
-
-        mStopActivity.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-
-                int action = MotionEventCompat.getActionMasked(motionEvent);
-
-                switch(action) {
-                    case (MotionEvent.ACTION_MOVE) :
-                        engageWithUser();
-                        return true;
-                    case (MotionEvent.ACTION_UP) :
-                        engageWithUser();
-                        return true;
-                }
-                return  true;
-            }
-        });
-
-        mStopApp.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-
-                int action = MotionEventCompat.getActionMasked(motionEvent);
-
-                switch(action) {
-                    case (MotionEvent.ACTION_MOVE) :
-                        doNotEngageWithUser();
-                        return true;
-                    case (MotionEvent.ACTION_UP) :
-                        doNotEngageWithUser();
-                        return true;
-                }
-                return  true;
-            }
-        });
     }
 
     private void initUi() {
 
-        mStopActivity = (FloatingActionButton) findViewById(R.id.stopActivity);
-        mStopApp = (FloatingActionButton) findViewById(R.id.stopApp);
+        mStopActivity = (FloatingActionButton) findViewById(R.id.stopActivityFab);
+        mStopApp = (FloatingActionButton) findViewById(R.id.stopAppFab);
+        mMuteSound = (FloatingActionButton)findViewById(R.id.muteFab);
 
         mName = (TextView) findViewById(R.id.otherUserName);
         //mConversationStarter = (TextView) findViewById(R.id.conversationStarter);
@@ -150,8 +157,6 @@ public class AlertActivity extends AppCompatActivity
             setNameAndPic();
         }
 
-        mYourPhotoUri = Uri.parse(PreferenceManager.getDefaultSharedPreferences(this).getString("PHOTO_URL", "defaultStringIfNothingFound"));
-        mYourTempPhoto = mYourPhotoUri.toString().replace("s96-c", "s150-c");
     }
 
     private void getGeoFireIntents() {
@@ -170,11 +175,8 @@ public class AlertActivity extends AppCompatActivity
                 mOtherUserLng = (double) b.get("OTHER_USER_LON");
 
                 // key
-                mUserKey = (String) b.get("USER_KEY");
+                mOtherUserUidKey = (String) b.get("USER_KEY");
             }
-        } else {
-            mOtherUserDisplayName = PreferenceManager.getDefaultSharedPreferences(this).getString("DISPLAY_NAME", "defaultStringIfNothingFound");
-            mOtherUsePhotoUri = Uri.parse(PreferenceManager.getDefaultSharedPreferences(this).getString("PHOTO_URL", "defaultStringIfNothingFound"));
         }
     }
 
@@ -214,7 +216,7 @@ public class AlertActivity extends AppCompatActivity
 
     public void setNameAndPic(){
         // set name and image
-        mName.setText("   " + mOtherUserDisplayName);
+        mName.setText(mOtherUserDisplayName);
         Glide.with(this).load(Uri.parse(mOtherUseTempPhoto)).into(mContactImage);
 
     }
@@ -248,25 +250,52 @@ public class AlertActivity extends AppCompatActivity
         super.onDestroy();
 
         mUserWantsToEngage.removeEventListener(mWantToEngageListener);
+        if (mAmountOfPeopleListener !=  null) {
+            mAmountOfPeopleIMet.removeEventListener(mAmountOfPeopleListener);
+        }
 
         if(mMediaPlayer != null){
             mMediaPlayer.stop();
             mMediaPlayer.release();
             mMediaPlayer = null;
         }
-
     }
 
     public void engageWithUser() {
         mIWantToEngage.setValue("true");
-        mMediaPlayer.stop();
-        finish();
+
+        // save person WRONG NAME?
+        HashMap<String, Object> timestampMet = new HashMap<>();
+        timestampMet.put("timestamp", ServerValue.TIMESTAMP);
+        PersonIMet person = new PersonIMet(mOtherUserDisplayName, mOtherUseTempPhoto, mMyLat, mMyLng, timestampMet);
+        //DatabaseReference newListRef = mPeopleIMet.push();
+        mPeopleIMet.setValue(person);
+        //newListRef.setValue(person);
+
+        // add 1 to amountOfPeopleIMet
+        mAmountOfPeopleIMet.addValueEventListener(mAmountOfPeopleListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.getValue() == null) {
+                    mNrAmountOfPeopleIMet = 0;
+                } else {
+                    mNrAmountOfPeopleIMet = dataSnapshot.getValue(int.class);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+        mAmountOfPeopleIMet.setValue(mNrAmountOfPeopleIMet + 1);
 
         // set Online to false
         mOnlineUsers = FirebaseDatabase.getInstance().getReference("onlineUsers");
-        mOnlineUsers.child(mUserUid).setValue(false);
+        mOnlineUsers.child(mMyUidKey).setValue(false);
 
-        mIWantToEngage.setValue("");
+        //mIWantToEngage.setValue("");
 
         Intent stopGroService = new Intent(AlertActivity.this, GeoFireService.class);
         stopService(stopGroService);
@@ -274,28 +303,34 @@ public class AlertActivity extends AppCompatActivity
         // set Alarm
         mAlarm.setAlarm(getApplicationContext());
 
+        mMediaPlayer.stop();
+        finish();
     }
 
     public void doNotEngageWithUser() {
+
+        // do not want to engage
         mIWantToEngage.setValue("false");
+
+        // set Online to false
+        mOnlineUsers = FirebaseDatabase.getInstance().getReference("onlineUsers");
+        mOnlineUsers.child(mMyUidKey).setValue(false);
+
+        // stop service
+        Intent stopGroService = new Intent(AlertActivity.this, GeoFireService.class);
+        stopService(stopGroService);
+
+        // set Alarm
+        mAlarm.setAlarm(getApplicationContext());
+
+        //
         mMediaPlayer.stop();
         finish();
         Intent i = new Intent(Intent.ACTION_MAIN);
         i.addCategory(Intent.CATEGORY_HOME);
         startActivity(i);
-
-        // set Online to false
-        mOnlineUsers = FirebaseDatabase.getInstance().getReference("onlineUsers");
-        mOnlineUsers.child(mUserUid).setValue(false);
-
-        mIWantToEngage.setValue("");
-
-        Intent stopGroService = new Intent(AlertActivity.this, GeoFireService.class);
-        stopService(stopGroService);
-
-        // set Alarm
-        mAlarm.setAlarm(getApplicationContext());
     }
+
 
     // map
     @Override
@@ -371,10 +406,5 @@ public class AlertActivity extends AppCompatActivity
 
 
         otherUser.showInfoWindow();
-    }
-
-
-    public void muteMusic(View view) {
-        mMediaPlayer.stop();
     }
 }

@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -22,6 +23,7 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -36,32 +38,35 @@ public class GeoFireService extends Service
         LocationListener {
 
     private static final String TAG = "GeoFireService";
-
-    static public GeoFire mGeoFire;
     private String mUserUid, mUserName, mUserPhotoUri, mUserEngageData;
-    private GeoQuery mGeoQuery;
-    private DatabaseReference mFireBaseProfiles, mIWantToEngage, mUserWantsToEngage;
-    public static DatabaseReference mOnlineUsers;
-
-    private GoogleApiClient mGoogleApiClient;
-    //private static final int REQUEST_CODE_LOCATION = 2;
+    boolean mClientIsOnline;
     private final String LOG_TAG = "TestApp";
 
-    boolean clientIsOnline;
+    // GeoFire and FireBase ref
+    static public GeoFire mGeoFire;
+    private GeoQuery mGeoQuery;
+    private DatabaseReference mFireBaseProfiles, mIWantToEngage, mUserWantsToEngage, mPeopleIMet;
+    public static DatabaseReference mOnlineUsers;
 
+    // GoogleApiClient
+    private GoogleApiClient mGoogleApiClient;
+    //private static final int REQUEST_CODE_LOCATION = 2;
+
+    // EventListeners
     ValueEventListener mFireBaseProfilesListener, mClientOnlineListener, mWantToEngageListener;
+    ChildEventListener mPeopleIMetListener;
 
     //private ArrayList<String> contacts;
 
     @Override
     public void onCreate() {
         super.onCreate();
-        //contacts = new ArrayList<>();
         checkUserUid();
         initFireBaseAndGeoFire();
         buildGoogleApiClient();
     }
 
+    // Build ApiClient
     private void buildGoogleApiClient() {
         // Build GoogleApiClient
         mGoogleApiClient = new GoogleApiClient.Builder(GeoFireService.this)
@@ -73,6 +78,7 @@ public class GeoFireService extends Service
         mGoogleApiClient.connect();
     }
 
+    // init FireBase ref
     private void initFireBaseAndGeoFire() {
         // init Firebase database
         FirebaseDatabase dataRef = FirebaseDatabase.getInstance();
@@ -89,6 +95,7 @@ public class GeoFireService extends Service
         mGeoFire = new GeoFire(ref);
     }
 
+    // stop service if USERUID is null (has not been set up properly)
     private void checkUserUid() {
         // get user info
         mUserUid = PreferenceManager.getDefaultSharedPreferences(this).getString("USERUID", "defaultStringIfNothingFound");
@@ -100,30 +107,6 @@ public class GeoFireService extends Service
         }
     }
 
-
-    public void onDestroy() {
-        mGoogleApiClient.disconnect();
-        mGeoFire.removeLocation(mUserUid);
-
-        if (mClientOnlineListener != null){
-            mOnlineUsers.removeEventListener(mClientOnlineListener);
-        }
-        if (mFireBaseProfilesListener != null){
-            mFireBaseProfiles.removeEventListener(mFireBaseProfilesListener);
-        }
-        if (mGeoQuery != null) {
-            mGeoQuery.removeAllListeners();
-        }
-        if (mWantToEngageListener != null) {
-            mUserWantsToEngage.removeEventListener(mWantToEngageListener);
-        }
-
-        mOnlineUsers.child(mUserUid).setValue(false);
-
-        Toast.makeText(this, "GeoFireService Stopped", Toast.LENGTH_LONG).show();
-        Log.d(TAG, "onDestroy");
-    }
-
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
@@ -131,7 +114,7 @@ public class GeoFireService extends Service
     }
 
 
-    // local
+    // GoogleApiClient functions
     @Override
     public void onConnected(@Nullable Bundle bundle) {
         LocationRequest locationRequest = LocationRequest.create();
@@ -158,16 +141,14 @@ public class GeoFireService extends Service
     public void onLocationChanged(final Location myLocation) {
         Log.i(LOG_TAG, myLocation.toString());
 
-        mIWantToEngage.setValue("");
-
-        //Toast.makeText(GeoFireService.this, "Your location is." + myLocation.getLatitude() + " " + myLocation.getLongitude(), Toast.LENGTH_SHORT).show();
 
         // get user set pref distance
         double geoFireDistance = 0.1; // 100 m
 
+        // set mGeoQuery to this device lat, lon and geoFireDistance
         mGeoQuery = mGeoFire.queryAtLocation(new GeoLocation(myLocation.getLatitude(), myLocation.getLongitude()), geoFireDistance);
 
-        // update Geofire
+        // update GeoFire to listen to this device lat & lon
         mGeoFire.setLocation(mUserUid, new GeoLocation(myLocation.getLatitude(), myLocation.getLongitude()), new GeoFire.CompletionListener() {
             @Override
             public void onComplete(String key, DatabaseError error) {
@@ -183,10 +164,23 @@ public class GeoFireService extends Service
         mGeoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
             @Override
             public void onKeyEntered(String key, GeoLocation otherUserLocation) {
-                System.out.println(String.format("Key %s entered the search area at [%f,%f]", key, otherUserLocation.latitude, otherUserLocation.longitude));
+                //System.out.println(String.format("Key %s entered the search area at [%f,%f]", key, otherUserLocation.latitude, otherUserLocation.longitude));
 
-                //Toast.makeText(GeoFireService.this, String.format("Key %s entered the search area at [%f,%f]", key, otherUserLocation.latitude, otherUserLocation.longitude), Toast.LENGTH_SHORT).show();
+                if (!key.matches(mUserUid)){
+                    mIWantToEngage.setValue(key);
+                }
 
+                // stop in 10 sec
+                new CountDownTimer(10000, 1000) { // 5000 = 5 sec
+
+                    public void onTick(long millisUntilFinished) {
+                    }
+
+                    public void onFinish() {
+                    }
+                }.start();
+
+                // init mUserWantsToEngage and set listener
                 mUserWantsToEngage = FirebaseDatabase.getInstance().getReference("mEstablishedConnection").child(key);
                 mUserWantsToEngage.addValueEventListener(mWantToEngageListener = new ValueEventListener() {
                     @Override
@@ -200,49 +194,81 @@ public class GeoFireService extends Service
                     }
                 });
 
-                // check that key is not you, and key is online, lertActivity is not visible and mUserWantsToEngage is ""
+                // proceed if key is not you, and key is online
                 if (!key.matches(mUserUid)
                         && keyIsOnline(key)
                         && !PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getBoolean("ALERT_IS_INFRONT", false)
-                        && mUserEngageData.equals("")) {
+                        && mUserEngageData.equals(mUserUid)){
 
-
-                    mFireBaseProfiles.child(key).addValueEventListener(mFireBaseProfilesListener = new ValueEventListener() {
+                    /*mPeopleIMet = FirebaseDatabase.getInstance().getReference("peopleIMet").child(mUserUid);
+                    mPeopleIMet.addChildEventListener(mPeopleIMetListener = new ChildEventListener() {
                         @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            Profile profile = dataSnapshot.getValue(Profile.class);
-                            mUserName = profile.getName();
-                            mUserPhotoUri = profile.getPhotoUri();
+                        public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+
+                        }
+
+                        @Override
+                        public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+                            String childKey = dataSnapshot.getKey();
+                            if (!contacts.contains(childKey)) {
+                                contacts.add(childKey);
+                                Toast.makeText(GeoFireService.this, childKey + " added to contactsArray", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+
+                        @Override
+                        public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+                        }
+
+                        @Override
+                        public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
                         }
 
                         @Override
                         public void onCancelled(DatabaseError databaseError) {
 
                         }
-                    });
+                    });*/
+
+                    // check that alertActivity is not visible and mUserWantsToEngage is mUserUid
 
 
-                    // if mUserName & mUserPhotoUri is not null, open Alert
-                    if (mUserName != null && mUserPhotoUri !=null
-                            /*&& !contacts.contains(key)*/) {
-                        Intent intent = new Intent(getBaseContext(), AlertActivity.class);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        intent.putExtra("USER_NAME", mUserName);
-                        intent.putExtra("USER_PHOTO", mUserPhotoUri);
-                        intent.putExtra("USER_KEY", key);
+                        mFireBaseProfiles.child(key).addValueEventListener(mFireBaseProfilesListener = new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                Profile profile = dataSnapshot.getValue(Profile.class);
+                                mUserName = profile.getName();
+                                mUserPhotoUri = profile.getPhotoUri();
+                            }
 
-                        // my coordinates
-                        intent.putExtra("YOUR_LAT", myLocation.getLatitude());
-                        intent.putExtra("YOUR_LON", myLocation.getLongitude());
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
 
-                        // other user coordinates
-                        intent.putExtra("OTHER_USER_LAT", otherUserLocation.latitude);
-                        intent.putExtra("OTHER_USER_LON", otherUserLocation.longitude);
+                            }
+                        });
 
-                        startActivity(intent);
-                        //contacts.add(key);
-                        //Toast.makeText(GeoFireService.this, key + " added to contacts", Toast.LENGTH_SHORT).show();
-                    }
+
+                        // if mUserName & mUserPhotoUri is not null, run AlertActivity
+                        if (mUserName != null && mUserPhotoUri !=null) {
+                            Intent intent = new Intent(getBaseContext(), AlertActivity.class);
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            intent.putExtra("USER_NAME", mUserName);
+                            intent.putExtra("USER_PHOTO", mUserPhotoUri);
+                            intent.putExtra("USER_KEY", key);
+
+                            // my coordinates
+                            intent.putExtra("YOUR_LAT", myLocation.getLatitude());
+                            intent.putExtra("YOUR_LON", myLocation.getLongitude());
+
+                            // other user coordinates
+                            intent.putExtra("OTHER_USER_LAT", otherUserLocation.latitude);
+                            intent.putExtra("OTHER_USER_LON", otherUserLocation.longitude);
+
+                            startActivity(intent);
+                        }
 
                 }
             }
@@ -270,6 +296,14 @@ public class GeoFireService extends Service
 
     }
 
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+        Log.i(LOG_TAG, "GoogleApiClient connection has failed");
+
+    }
+
+    // check if client is online
     private boolean keyIsOnline(String key) {
 
         //check that key-client is online
@@ -277,9 +311,9 @@ public class GeoFireService extends Service
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (dataSnapshot != null){
-                    clientIsOnline = dataSnapshot.getValue(boolean.class);
+                    mClientIsOnline = dataSnapshot.getValue(boolean.class);
                 } else
-                    clientIsOnline = false;
+                    mClientIsOnline = false;
             }
 
             @Override
@@ -288,12 +322,32 @@ public class GeoFireService extends Service
             }
         });
 
-        return clientIsOnline;
+        return mClientIsOnline;
     };
 
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        Log.i(LOG_TAG, "GoogleApiClient connection has failed");
+    public void onDestroy() {
+        mGoogleApiClient.disconnect();
+        mGeoFire.removeLocation(mUserUid);
 
+        if (mClientOnlineListener != null){
+            mOnlineUsers.removeEventListener(mClientOnlineListener);
+        }
+        if (mFireBaseProfilesListener != null){
+            mFireBaseProfiles.removeEventListener(mFireBaseProfilesListener);
+        }
+        if (mGeoQuery != null) {
+            mGeoQuery.removeAllListeners();
+        }
+        if (mWantToEngageListener != null) {
+            mUserWantsToEngage.removeEventListener(mWantToEngageListener);
+        }
+        /*if (mPeopleIMetListener != null) {
+            mPeopleIMet.removeEventListener(mPeopleIMetListener);
+        }*/
+
+        mOnlineUsers.child(mUserUid).setValue(false);
+
+        Toast.makeText(this, "GeoFireService Stopped", Toast.LENGTH_LONG).show();
+        Log.d(TAG, "onDestroy");
     }
 }

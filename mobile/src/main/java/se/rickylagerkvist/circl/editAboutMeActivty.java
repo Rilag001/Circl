@@ -1,6 +1,7 @@
 package se.rickylagerkvist.circl;
 
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -54,6 +55,17 @@ public class EditAboutMeActivty extends AppCompatActivity {
                 myProfileRef.setValue(userInput.getText().toString());
                 Snackbar.make(view, R.string.about_me_updated, Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
+
+                // finish() in 2 sec
+                new CountDownTimer(2000, 1000) { // 2000 = 5 sec
+
+                    public void onTick(long millisUntilFinished) {
+                    }
+
+                    public void onFinish() {
+                        finish();
+                    }
+                }.start();
             }
         });
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);

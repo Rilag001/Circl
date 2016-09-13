@@ -7,19 +7,20 @@ import java.util.HashMap;
  */
 public class PersonIMet {
 
-    private String mName, photoUri;
-    private double mLat, mLon;
+    private String mName, mPhotoUri, mAddress;
     private HashMap<String, Object> mTimestampMet;
+    private double mLat, mLng;
 
     public PersonIMet() {
     }
 
-    public PersonIMet(String name, String photoUri, double lat, double lon, HashMap<String, Object> timestampMet) {
+    public PersonIMet(String name, String photoUri, String address, HashMap<String, Object> timestampMet, double lat, double lng) {
         mName = name;
-        this.photoUri = photoUri;
-        mLat = lat;
-        mLon = lon;
+        mPhotoUri = photoUri;
+        mAddress = address;
         mTimestampMet = timestampMet;
+        mLat = lat;
+        mLng = lng;
     }
 
     public String getName() {
@@ -31,11 +32,27 @@ public class PersonIMet {
     }
 
     public String getPhotoUri() {
-        return photoUri;
+        return mPhotoUri;
     }
 
     public void setPhotoUri(String photoUri) {
-        this.photoUri = photoUri;
+        mPhotoUri = photoUri;
+    }
+
+    public String getAddress() {
+        return mAddress;
+    }
+
+    public void setAddress(String address) {
+        mAddress = address;
+    }
+
+    public HashMap<String, Object> getTimestampMet() {
+        return mTimestampMet;
+    }
+
+    public void setTimestampMet(HashMap<String, Object> timestampMet) {
+        mTimestampMet = timestampMet;
     }
 
     public double getLat() {
@@ -46,19 +63,17 @@ public class PersonIMet {
         mLat = lat;
     }
 
-    public double getLon() {
-        return mLon;
+    public double getLng() {
+        return mLng;
     }
 
-    public void setLon(double lon) {
-        mLon = lon;
+    public void setLng(double lng) {
+        mLng = lng;
     }
 
-    public HashMap<String, Object> getTimestampMet() {
-        return mTimestampMet;
-    }
+    //@JsonIgnore
 
-    public void setTimestampMet(HashMap<String, Object> timestampMet) {
-        mTimestampMet = timestampMet;
+    public long getTimestampLastChangedLong() {
+        return (long) mTimestampMet.get("timestamp");
     }
 }

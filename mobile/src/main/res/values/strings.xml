@@ -93,5 +93,9 @@
     <string name="about_me_updated">About me updated</string>
     <string name="about_me">About me...</string>
     <string name="start_geotracking">Start GeoTracking</string>
+    <string name="_1_point">+1</string>
+    <string name="point">Point</string>
+    <string name="dont_engage_text">Don´t talk then, you party pooper...</string>
+    <string name="people_i_met">People I met</string>
 
 </resources>

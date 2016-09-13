@@ -76,7 +76,7 @@
                         android:layout_height="14dp"
                         android:scaleType="fitCenter"
                         android:background="@android:color/white"
-                        android:src="@drawable/pencil_fill"
+                        android:src="@drawable/ic_mode_edit_black_18dp"
                         android:id="@+id/editAboutMeButton"
                         android:layout_alignTop="@+id/aboutMeTitle"
                         android:layout_alignParentRight="true"

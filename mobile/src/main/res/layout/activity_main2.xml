@@ -56,7 +56,7 @@
         android:layout_marginBottom="76dp"
         android:layout_marginRight="16dp"
         android:layout_marginEnd="16dp"
-        android:src="@drawable/pencil_fill"
+        android:src="@drawable/ic_mode_edit_white_24dp"
         android:tint="@android:color/white"
         app:backgroundTint="@color/colorAccent"/>
 

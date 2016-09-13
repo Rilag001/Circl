@@ -38,7 +38,6 @@ public class MainActivity extends AppCompatActivity {
         initUI();
         checkForLocationPermit();
 
-
         // init to false
         PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit().putBoolean("ALERT_IS_INFRONT", false).apply();
 
@@ -74,11 +73,14 @@ public class MainActivity extends AppCompatActivity {
             Intent startLoginActivity = new Intent(MainActivity.this, LoginActivity.class);
             startActivity(startLoginActivity);
 
-        } else if (id == R.id.stop_geoTacking) {
             Intent stopService = new Intent(MainActivity.this, GeoFireService.class);
             stopService(stopService);
 
-        } else  if (id == R.id.start_geoTacking) {
+        } else if (id == R.id.stop_geoTracking) {
+            Intent stopService = new Intent(MainActivity.this, GeoFireService.class);
+            stopService(stopService);
+
+        } else  if (id == R.id.start_geoTracking) {
             Intent startService = new Intent(MainActivity.this, GeoFireService.class);
             startService(startService);
 
@@ -111,7 +113,7 @@ public class MainActivity extends AppCompatActivity {
         final ArrayList<NavigationTabBar.Model> models = new ArrayList<>();
         models.add(
                 new NavigationTabBar.Model.Builder(
-                        getResources().getDrawable(R.drawable.rewards_trophy_line),
+                        getResources().getDrawable(R.drawable.ic_history_white_24dp),
                         R.color.colorPrimary)
                         //.selectedIcon(getResources().getDrawable(R.drawable.rewards_trophy_fill))
                         .title(getString(R.string.Achievements))
@@ -120,7 +122,7 @@ public class MainActivity extends AppCompatActivity {
         );
         models.add(
                 new NavigationTabBar.Model.Builder(
-                        getResources().getDrawable(R.drawable.chat_bubble_square_line),
+                        getResources().getDrawable(R.drawable.ic_perm_identity_white_24dp),
                         R.color.colorPrimary)
                         //.selectedIcon(getResources().getDrawable(R.drawable.chat_bubble_square_fill))
                         .title(getString(R.string.Chat))
@@ -129,7 +131,7 @@ public class MainActivity extends AppCompatActivity {
         );
         models.add(
                 new NavigationTabBar.Model.Builder(
-                        getResources().getDrawable(R.drawable.user_chat_line),
+                        getResources().getDrawable(R.drawable.ic_chat_bubble_outline_white_24dp),
                         R.color.colorPrimary)
                         //.selectedIcon(getResources().getDrawable(R.drawable.user_chat_fill))
                         .title(getString(R.string.Profile))
@@ -189,8 +191,8 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.fab).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View v) {
-                Intent startAlertActivity = new Intent(MainActivity.this, AlertActivity.class);
-                startActivity(startAlertActivity);
+                /*Intent startAlertActivity = new Intent(MainActivity.this, AlertActivity.class);
+                startActivity(startAlertActivity);*/
 
                 /*coordinatorLayout.postDelayed(new Runnable() {
                     @Override

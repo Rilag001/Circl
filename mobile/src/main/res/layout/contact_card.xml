@@ -10,10 +10,15 @@
         android:layout_height="wrap_content"
         android:id="@+id/card_contact"
         android:background="@android:color/white"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_marginTop="4dp"
-        android:layout_marginBottom="4dp">
+        >
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_gravity="bottom"
+            android:background="@android:color/darker_gray"
+            android:id="@+id/line"/>
+
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -22,34 +27,27 @@
             android:baselineAligned="false">
 
             <de.hdodenhof.circleimageview.CircleImageView
-                android:layout_width="96dp"
-                android:layout_height="96dp"
+                android:layout_width="75dp"
+                android:layout_height="75dp"
                 android:id="@+id/profile_pic"
                 android:src="@color/colorAccent"
-                android:layout_margin="8dp"
+                android:layout_margin="16dp"
                 android:layout_gravity="center_vertical" />
 
-            <RelativeLayout
+            <LinearLayout
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_marginRight="16dp"
+                android:orientation="vertical"
+                android:layout_gravity="center_vertical"
                 android:layout_marginEnd="16dp">
-
-                <View
-                    android:layout_width="fill_parent"
-                    android:layout_height="1dp"
-                    android:background="@android:color/black"
-                    android:layout_centerInParent="true"
-                    android:id="@+id/line"/>
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:id="@+id/name"
                     android:text="Name LastName"
-                    android:textSize="18sp"
-                    android:layout_alignBottom="@+id/line"
-                    android:layout_marginBottom="4dp"/>
+                    android:textSize="18sp"/>
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -57,10 +55,19 @@
                     android:id="@+id/whereWeMet"
                     android:text="We met at: Long; lat"
                     android:textSize="15sp"
-                    android:layout_below="@+id/line"
                     android:layout_marginTop="4dp"/>
 
-            </RelativeLayout>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/timeWeMet"
+                    android:text="2016-09-13 10:30"
+                    android:textSize="15sp"
+                    android:layout_marginTop="4dp"/>
+
+
+            </LinearLayout>
+
         </LinearLayout>
 
     </android.support.v7.widget.CardView>

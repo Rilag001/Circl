@@ -97,5 +97,7 @@
     <string name="point">Point</string>
     <string name="dont_engage_text">Don´t talk then, you party pooper...</string>
     <string name="people_i_met">People I met</string>
+    <string name="title_activity_settings2">SettingsActivity2</string>
+    <string name="search_area">Search area</string>
 
 </resources>

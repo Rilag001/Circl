@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import se.rickylagerkvist.circl.Fragments.AchievementsFragment;
 import se.rickylagerkvist.circl.Fragments.ChatFragment;
 import se.rickylagerkvist.circl.Fragments.ProfileFragment;
+import se.rickylagerkvist.circl.Utils.GeoFireService;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -85,7 +86,7 @@ public class MainActivity extends AppCompatActivity {
             startService(startService);
 
         } else  if (id == R.id.settings) {
-            Intent startSettingsActivity = new Intent(MainActivity.this, SettingsActivity.class);
+            Intent startSettingsActivity = new Intent(MainActivity.this, SettingsActivity2.class);
             startActivity(startSettingsActivity);
         }
 

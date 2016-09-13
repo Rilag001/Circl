@@ -13,6 +13,7 @@ import com.google.firebase.database.Query;
 import java.util.Date;
 
 import se.rickylagerkvist.circl.Data.PersonIMet;
+import se.rickylagerkvist.circl.Utils.Utils;
 
 /**
  * Created by Ricky on 2016-09-12.

@@ -1,4 +1,4 @@
-package se.rickylagerkvist.circl;
+package se.rickylagerkvist.circl.Utils;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

@@ -26,7 +26,7 @@ import se.rickylagerkvist.circl.R;
  */
 public class AchievementsFragment extends Fragment {
 
-    private TextView mPointsTextView;
+    private TextView mPointsTextView, mPointsTextView2;
     private ListView mListView;
     private DatabaseReference mPoints, mPeopleIMet;
     private PeopleIMetCardAdapter mPeopleIMetCardAdapter;
@@ -44,9 +44,11 @@ public class AchievementsFragment extends Fragment {
 
         mListView = (ListView) rootView.findViewById(R.id.listviwe_achievements);
         mPointsTextView = (TextView) rootView.findViewById(R.id.points);
+        mPointsTextView2 = (TextView) rootView.findViewById(R.id.points2);
 
         Typeface typeface = Typeface.createFromAsset(getContext().getAssets(),"shadowsIntoLight.ttf"); // create a typeface from the raw ttf
         mPointsTextView.setTypeface(typeface); // apply the typeface to the textview
+        mPointsTextView2.setTypeface(typeface);
 
         // get my key
         String mMyUidKey = PreferenceManager.getDefaultSharedPreferences(getContext()).getString("USERUID", "defaultStringIfNothingFound");

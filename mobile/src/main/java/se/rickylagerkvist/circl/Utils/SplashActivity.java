@@ -1,9 +1,12 @@
-package se.rickylagerkvist.circl;
+package se.rickylagerkvist.circl.Utils;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
+
+import se.rickylagerkvist.circl.LoginActivity;
+import se.rickylagerkvist.circl.MainActivity;
 
 public class SplashActivity extends AppCompatActivity {
 

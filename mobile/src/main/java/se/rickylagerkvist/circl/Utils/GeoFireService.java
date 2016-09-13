@@ -1,4 +1,4 @@
-package se.rickylagerkvist.circl;
+package se.rickylagerkvist.circl.Utils;
 
 import android.app.Service;
 import android.content.Intent;
@@ -30,6 +30,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import se.rickylagerkvist.circl.AlertActivity;
 import se.rickylagerkvist.circl.Data.Profile;
 
 public class GeoFireService extends Service
@@ -41,6 +42,7 @@ public class GeoFireService extends Service
     private String mUserUid, mUserName, mUserPhotoUri, mUserEngageData;
     boolean mClientIsOnline;
     private final String LOG_TAG = "TestApp";
+    private int geoFireDistanceiInt;
 
     // GeoFire and FireBase ref
     static public GeoFire mGeoFire;
@@ -143,7 +145,11 @@ public class GeoFireService extends Service
 
 
         // get user set pref distance
-        double geoFireDistance = 0.1; // 100 m
+        geoFireDistanceiInt = PreferenceManager.getDefaultSharedPreferences(this).getInt("SEARCH_AREA_NR", 1) + 1;
+        double geoFireDistance = (1.0 * geoFireDistanceiInt) / 10;
+
+        //double geoFireDistance = 0.1; // 100 m
+        Toast.makeText(GeoFireService.this, "" + geoFireDistance, Toast.LENGTH_SHORT).show();
 
         // set mGeoQuery to this device lat, lon and geoFireDistance
         mGeoQuery = mGeoFire.queryAtLocation(new GeoLocation(myLocation.getLatitude(), myLocation.getLongitude()), geoFireDistance);

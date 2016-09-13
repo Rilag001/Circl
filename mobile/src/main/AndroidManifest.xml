@@ -15,7 +15,6 @@
     <!-- Location -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
-
     <uses-permission android:name="android.permission.VIBRATE"/>
 
     <application
@@ -31,15 +30,15 @@
 
         <activity
             android:name=".AlertActivity"
-            android:theme="@style/Fullscreen"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait"
+            android:theme="@style/Fullscreen">
         </activity>
         <activity
             android:name=".LoginActivity"
             android:theme="@style/AppTheme">
         </activity>
         <activity
-            android:name=".SplashActivity"
+            android:name=".Utils.SplashActivity"
             android:theme="@style/SplashTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -50,28 +49,29 @@
 
         <!-- Declaring broadcast receiver for BOOT_COMPLETED event. -->
         <receiver
-            android:name=".AutoStart"
+            android:name=".Utils.AutoStart"
             android:enabled="true"
             android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED"/>
             </intent-filter>
             <intent-filter>
-                <action android:name="android.intent.action.PACKAGE_REPLACED" />
-                <data android:scheme="package" />
+                <action android:name="android.intent.action.PACKAGE_REPLACED"/>
+
+                <data android:scheme="package"/>
             </intent-filter>
             <intent-filter>
-                <action android:name="android.intent.action.PACKAGE_ADDED" />
-                <data android:scheme="package" />
+                <action android:name="android.intent.action.PACKAGE_ADDED"/>
+
+                <data android:scheme="package"/>
             </intent-filter>
         </receiver>
-
         <receiver
-            android:process=":remote"
-            android:name=".Alarm">
+            android:name=".Utils.Alarm"
+            android:process=":remote">
         </receiver>
 
-        <service android:name=".GeoFireService">
+        <service android:name=".Utils.GeoFireService">
         </service>
 
         <activity android:name=".MainActivity">
@@ -99,6 +99,16 @@
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version"/>
+
+        <activity
+            android:name=".SettingsActivity2"
+            android:label="@string/title_activity_settings2"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/AppTheme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="se.rickylagerkvist.circl.MainActivity"/>
+        </activity>
 
     </application>
 

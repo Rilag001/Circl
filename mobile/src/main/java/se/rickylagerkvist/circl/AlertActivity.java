@@ -49,6 +49,8 @@ import java.util.Locale;
 import java.util.Random;
 
 import se.rickylagerkvist.circl.Data.PersonIMet;
+import se.rickylagerkvist.circl.Utils.Alarm;
+import se.rickylagerkvist.circl.Utils.GeoFireService;
 
 public class AlertActivity extends AppCompatActivity
         implements GoogleApiClient.ConnectionCallbacks,

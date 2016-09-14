@@ -111,9 +111,8 @@ public class AlertActivity extends AppCompatActivity
             @Override
             public void onClick(View view) {
                 //engageWithUser();
-                mIWantToEngage.setValue("true");
                 if (mEngageScreen.getVisibility() == View.INVISIBLE){
-                    wantToEngageWindow();
+                    engageWithUser();
                 }
             }
         });
@@ -122,9 +121,8 @@ public class AlertActivity extends AppCompatActivity
             @Override
             public void onClick(View view) {
                 //doNotEngageWithUser();
-                mIWantToEngage.setValue("false");
                 if (mEngageScreen.getVisibility() == View.INVISIBLE){
-                    doNotWantToEngageWindow();
+                    doNotEngageWithUser();
                 }
             }
         });
@@ -313,39 +311,33 @@ public class AlertActivity extends AppCompatActivity
                         mNrAmountOfPeopleIMet = dataSnapshot.getValue(int.class);
                     }
                     mAmountOfPeopleIMet.setValue(mNrAmountOfPeopleIMet + 1);
-
                 }
 
                 @Override
                 public void onCancelled(DatabaseError databaseError) {
-
                 }
             });
-            // show EngageWindow for 10 s, stop mVibrator and mMediaPlayer
-            wantToEngageWindow();
 
-            // do not run this function again
+            mVibrator.cancel();
+
+            // mEngageScreen visible
+            mEngageScreen.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.colorPrimary));
+            mEngageScreen.setVisibility(View.VISIBLE);
+            mPointsTextView.setText("1");
+            mPointsTextView.setTextColor(ContextCompat.getColor(getApplicationContext(), R.color.colorPrimary));
+            mConversationStarterTextView.setText(mConversationStarters.get(new Random().nextInt(mConversationStarters.size())));
+            mConversationStarterTextView.setTextColor(ContextCompat.getColor(getApplicationContext(), R.color.colorPrimary));
+
+            if (mMediaPlayer != null){
+                mMediaPlayer.stop();
+            }
+            stopServiceAndSetAlarm();
+
             mEngageAlreadyExecuted = true;
         }
-
-
     }
 
-    private void wantToEngageWindow() {
-        mVibrator.cancel();
-
-        // mEngageScreen visible
-        mEngageScreen.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.colorPrimary));
-        mEngageScreen.setVisibility(View.VISIBLE);
-        mPointsTextView.setText("1");
-        mPointsTextView.setTextColor(ContextCompat.getColor(getApplicationContext(), R.color.colorPrimary));
-        mConversationStarterTextView.setText(mConversationStarters.get(new Random().nextInt(mConversationStarters.size())));
-        mConversationStarterTextView.setTextColor(ContextCompat.getColor(getApplicationContext(), R.color.colorPrimary));
-
-        if (mMediaPlayer != null){
-            mMediaPlayer.stop();
-        }
-
+    public void stopServiceAndSetAlarm(){
         // stop service
         Intent stopGroService = new Intent(AlertActivity.this, GeoFireService.class);
         stopService(stopGroService);
@@ -364,6 +356,8 @@ public class AlertActivity extends AppCompatActivity
             }
         }.start();
 
+        // do not run this function again
+
     }
 
     public void doNotEngageWithUser() {
@@ -381,33 +375,28 @@ public class AlertActivity extends AppCompatActivity
             Intent stopGroService = new Intent(AlertActivity.this, GeoFireService.class);
             stopService(stopGroService);
 
+            mVibrator.cancel();
 
             if (mMediaPlayer != null){
                 mMediaPlayer.stop();
             }
-            // show EngageWindow for 10 s, stop mVibrator and mMediaPlayer
-            doNotWantToEngageWindow();
+
+            // mEngageScreen visible
+            mEngageScreen.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.color1));
+            mEngageScreen.setVisibility(View.VISIBLE);
+            mPointsTextView.setText("0");
+            mPointsTextView.setTextColor(ContextCompat.getColor(getApplicationContext(), R.color.color1));
+            mConversationStarterTextView.setText(R.string.dont_engage_text);
+            mConversationStarterTextView.setTextColor(ContextCompat.getColor(getApplicationContext(), R.color.color1));
+
+            setAlarmAndFinish();
 
             // do not run this function again
             mNotEngagedAlreadyExecuted = true;
         }
     }
 
-    private void doNotWantToEngageWindow() {
-        mVibrator.cancel();
-
-        // mEngageScreen visible
-        mEngageScreen.setBackgroundColor(ContextCompat.getColor(getApplicationContext(), R.color.color1));
-        mEngageScreen.setVisibility(View.VISIBLE);
-        mPointsTextView.setText("0");
-        mPointsTextView.setTextColor(ContextCompat.getColor(getApplicationContext(), R.color.color1));
-        mConversationStarterTextView.setText(R.string.dont_engage_text);
-        mConversationStarterTextView.setTextColor(ContextCompat.getColor(getApplicationContext(), R.color.color1));
-
-        if (mMediaPlayer != null){
-            mMediaPlayer.stop();
-        }
-
+    public void setAlarmAndFinish(){
         // set Alarm
         mAlarm.setAlarm(getApplicationContext());
 

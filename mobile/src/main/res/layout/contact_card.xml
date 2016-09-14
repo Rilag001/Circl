@@ -9,16 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/card_contact"
-        android:background="@android:color/white"
-        >
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_gravity="bottom"
-            android:background="@android:color/darker_gray"
-            android:id="@+id/line"/>
-
+        android:background="@android:color/white">
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -27,8 +18,8 @@
             android:baselineAligned="false">
 
             <de.hdodenhof.circleimageview.CircleImageView
-                android:layout_width="75dp"
-                android:layout_height="75dp"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
                 android:id="@+id/profile_pic"
                 android:src="@color/colorAccent"
                 android:layout_margin="16dp"
@@ -54,16 +45,14 @@
                     android:layout_height="wrap_content"
                     android:id="@+id/whereWeMet"
                     android:text="We met at: Long; lat"
-                    android:textSize="15sp"
-                    android:layout_marginTop="4dp"/>
+                    android:textSize="15sp"/>
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:id="@+id/timeWeMet"
                     android:text="2016-09-13 10:30"
-                    android:textSize="15sp"
-                    android:layout_marginTop="4dp"/>
+                    android:textSize="15sp"/>
 
 
             </LinearLayout>

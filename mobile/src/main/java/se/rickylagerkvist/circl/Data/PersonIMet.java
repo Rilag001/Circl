@@ -8,8 +8,8 @@ import java.util.HashMap;
 public class PersonIMet {
 
     private String mName, mPhotoUri, mAddress;
-    private HashMap<String, Object> mTimestampMet;
     private double mLat, mLng;
+    private HashMap<String, Object> mTimestampMet;
 
     public PersonIMet() {
     }
@@ -71,9 +71,8 @@ public class PersonIMet {
         mLng = lng;
     }
 
-    //@JsonIgnore
-
+    /*@JsonIgnore
     public long getTimestampLastChangedLong() {
         return (long) mTimestampMet.get("timestamp");
-    }
+    }*/
 }

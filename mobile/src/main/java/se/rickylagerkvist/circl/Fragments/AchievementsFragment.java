@@ -64,6 +64,11 @@ public class AchievementsFragment extends Fragment {
                 if (dataSnapshot.exists()){
                     int mNrAmountOfPeopleIMet = dataSnapshot.getValue(int.class);
                     mPointsTextView.setText(mPointsTextView.getText() + " " + mNrAmountOfPeopleIMet);
+                    if (mNrAmountOfPeopleIMet <= 1){
+                        mPointsTextView2.setText("Person I met");
+                    } else {
+                        mPointsTextView2.setText("People I met");
+                    }
                 }
             }
 

@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
-import android.os.CountDownTimer;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -23,7 +22,6 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -40,25 +38,20 @@ public class GeoFireService extends Service
 
     private static final String TAG = "GeoFireService";
     private String mUserUid, mUserName, mUserPhotoUri, mUserEngageData;
-    boolean mClientIsOnline;
+    private boolean mClientIsOnline;
     private final String LOG_TAG = "TestApp";
-    private int geoFireDistanceiInt;
 
     // GeoFire and FireBase ref
     static public GeoFire mGeoFire;
     private GeoQuery mGeoQuery;
-    private DatabaseReference mFireBaseProfiles, mIWantToEngage, mUserWantsToEngage, mPeopleIMet;
+    private DatabaseReference mFireBaseProfiles, mIWantToEngage, mUserWantsToEngage;
     public static DatabaseReference mOnlineUsers;
 
     // GoogleApiClient
     private GoogleApiClient mGoogleApiClient;
-    //private static final int REQUEST_CODE_LOCATION = 2;
 
     // EventListeners
     ValueEventListener mFireBaseProfilesListener, mClientOnlineListener, mWantToEngageListener;
-    ChildEventListener mPeopleIMetListener;
-
-    //private ArrayList<String> contacts;
 
     @Override
     public void onCreate() {
@@ -101,9 +94,7 @@ public class GeoFireService extends Service
     private void checkUserUid() {
         // get user info
         mUserUid = PreferenceManager.getDefaultSharedPreferences(this).getString("USERUID", "defaultStringIfNothingFound");
-
         if (mUserUid.equals("defaultStringIfNothingFound") || mUserUid.isEmpty() || mUserUid == null){
-
             Intent stopGeoFireService = new Intent(getBaseContext(), GeoFireService.class);
             stopService(stopGeoFireService);
         }
@@ -136,19 +127,17 @@ public class GeoFireService extends Service
     @Override
     public void onConnectionSuspended(int i) {
         Log.i(LOG_TAG, "GoogleApiClient connection has been suspended");
-
     }
 
     @Override
     public void onLocationChanged(final Location myLocation) {
         Log.i(LOG_TAG, myLocation.toString());
 
-
-        // get user set pref distance
-        geoFireDistanceiInt = PreferenceManager.getDefaultSharedPreferences(this).getInt("SEARCH_AREA_NR", 1) + 1;
+        // get user set pref distance, convert to double, divide by 10 for right format
+        int geoFireDistanceiInt = PreferenceManager.getDefaultSharedPreferences(this).getInt("SEARCH_AREA_NR", 1) + 1;
         double geoFireDistance = (1.0 * geoFireDistanceiInt) / 10;
 
-        //double geoFireDistance = 0.1; // 100 m
+        //double geoFireDistance  (0.1 = 100 m)
         Toast.makeText(GeoFireService.this, "" + geoFireDistance, Toast.LENGTH_SHORT).show();
 
         // set mGeoQuery to this device lat, lon and geoFireDistance
@@ -174,74 +163,25 @@ public class GeoFireService extends Service
 
                 if (!key.matches(mUserUid)){
                     mIWantToEngage.setValue(key);
-                }
 
-                // stop in 10 sec
-                new CountDownTimer(10000, 1000) { // 5000 = 5 sec
-
-                    public void onTick(long millisUntilFinished) {
-                    }
-
-                    public void onFinish() {
-                    }
-                }.start();
-
-                // init mUserWantsToEngage and set listener
-                mUserWantsToEngage = FirebaseDatabase.getInstance().getReference("mEstablishedConnection").child(key);
-                mUserWantsToEngage.addValueEventListener(mWantToEngageListener = new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        mUserEngageData = dataSnapshot.getValue(String.class);
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-
-                    }
-                });
-
-                // proceed if key is not you, and key is online
-                if (!key.matches(mUserUid)
-                        && keyIsOnline(key)
-                        && !PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getBoolean("ALERT_IS_INFRONT", false)
-                        && mUserEngageData.equals(mUserUid)){
-
-                    /*mPeopleIMet = FirebaseDatabase.getInstance().getReference("peopleIMet").child(mUserUid);
-                    mPeopleIMet.addChildEventListener(mPeopleIMetListener = new ChildEventListener() {
+                    // init mUserWantsToEngage and set listener
+                    mUserWantsToEngage = FirebaseDatabase.getInstance().getReference("mEstablishedConnection").child(key);
+                    mUserWantsToEngage.addValueEventListener(mWantToEngageListener = new ValueEventListener() {
                         @Override
-                        public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-
-                        }
-
-                        @Override
-                        public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-                            String childKey = dataSnapshot.getKey();
-                            if (!contacts.contains(childKey)) {
-                                contacts.add(childKey);
-                                Toast.makeText(GeoFireService.this, childKey + " added to contactsArray", Toast.LENGTH_SHORT).show();
-                            }
-                        }
-
-                        @Override
-                        public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-                        }
-
-                        @Override
-                        public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            mUserEngageData = dataSnapshot.getValue(String.class);
                         }
 
                         @Override
                         public void onCancelled(DatabaseError databaseError) {
-
                         }
-                    });*/
+                    });
 
-                    // check that alertActivity is not visible and mUserWantsToEngage is mUserUid
+                    // proceed if key is online, AlertActivity is not in front and mUserEngageData is set to mUserUid
+                    if (keyIsOnline(key) && mUserEngageData.equals(mUserUid)
+                            && !PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getBoolean("ALERT_IS_INFRONT", false)){
 
-
+                        // get profile info
                         mFireBaseProfiles.child(key).addValueEventListener(mFireBaseProfilesListener = new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -252,10 +192,8 @@ public class GeoFireService extends Service
 
                             @Override
                             public void onCancelled(DatabaseError databaseError) {
-
                             }
                         });
-
 
                         // if mUserName & mUserPhotoUri is not null, run AlertActivity
                         if (mUserName != null && mUserPhotoUri !=null) {
@@ -275,7 +213,7 @@ public class GeoFireService extends Service
 
                             startActivity(intent);
                         }
-
+                    }
                 }
             }
 
@@ -299,20 +237,16 @@ public class GeoFireService extends Service
                 System.err.println("There was an error with this query: " + error);
             }
         });
-
     }
-
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
         Log.i(LOG_TAG, "GoogleApiClient connection has failed");
-
     }
 
     // check if client is online
     private boolean keyIsOnline(String key) {
 
-        //check that key-client is online
         mOnlineUsers.child(key).addValueEventListener(mClientOnlineListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -324,10 +258,8 @@ public class GeoFireService extends Service
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-
             }
         });
-
         return mClientIsOnline;
     };
 
@@ -347,9 +279,6 @@ public class GeoFireService extends Service
         if (mWantToEngageListener != null) {
             mUserWantsToEngage.removeEventListener(mWantToEngageListener);
         }
-        /*if (mPeopleIMetListener != null) {
-            mPeopleIMet.removeEventListener(mPeopleIMetListener);
-        }*/
 
         mOnlineUsers.child(mUserUid).setValue(false);
 

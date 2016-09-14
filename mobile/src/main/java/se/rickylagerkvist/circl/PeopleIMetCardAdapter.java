@@ -38,10 +38,11 @@ public class PeopleIMetCardAdapter extends FirebaseListAdapter<PersonIMet> {
         name.setText(model.getName());
         place.setText(model.getAddress());
         time.setText(Utils.SIMPLE_DATE_FORMAT.format(
-                new Date(model.getTimestampLastChangedLong())
+                new Date(Long.valueOf(model.getTimestampMet().get("timestamp").toString()))
         ));
-        Glide.with(mActivity).load(Uri.parse(model.getPhotoUri().replace("s96-c", "s75-c"))).into(contactPic);
+        Glide.with(mActivity).load(Uri.parse(model.getPhotoUri().replace("s96-c", "s60-c"))).into(contactPic);
 
+        //Long.valueOf(model.getTimestampMet().get("timestamp").toString()).longValue();
     }
 }
 

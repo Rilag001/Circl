@@ -1,5 +1,7 @@
 package se.rickylagerkvist.circl.Data;
 
+import com.google.firebase.database.Exclude;
+
 import java.util.HashMap;
 
 /**
@@ -75,4 +77,9 @@ public class PersonIMet {
     public long getTimestampLastChangedLong() {
         return (long) mTimestampMet.get("timestamp");
     }*/
+
+    @Exclude
+    public long getTimestampLong(){
+        return (long)mTimestampMet.get("timestamp");
+    }
 }

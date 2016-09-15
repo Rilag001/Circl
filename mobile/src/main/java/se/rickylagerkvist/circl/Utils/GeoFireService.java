@@ -29,6 +29,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import se.rickylagerkvist.circl.AlertActivity;
+import se.rickylagerkvist.circl.Data.PersonIMet;
 import se.rickylagerkvist.circl.Data.Profile;
 
 public class GeoFireService extends Service
@@ -38,20 +39,20 @@ public class GeoFireService extends Service
 
     private static final String TAG = "GeoFireService";
     private String mUserUid, mUserName, mUserPhotoUri, mUserEngageData;
-    private boolean mClientIsOnline;
+    private boolean mClientIsOnline, mMetPersonMoreThenADayAgo;
     private final String LOG_TAG = "TestApp";
 
     // GeoFire and FireBase ref
     static public GeoFire mGeoFire;
     private GeoQuery mGeoQuery;
-    private DatabaseReference mFireBaseProfiles, mIWantToEngage, mUserWantsToEngage;
+    private DatabaseReference mFireBaseProfiles, mIWantToEngage, mUserWantsToEngage, mPeopleIMet;
     public static DatabaseReference mOnlineUsers;
 
     // GoogleApiClient
     private GoogleApiClient mGoogleApiClient;
 
     // EventListeners
-    ValueEventListener mFireBaseProfilesListener, mClientOnlineListener, mWantToEngageListener;
+    ValueEventListener mFireBaseProfilesListener, mClientOnlineListener, mWantToEngageListener, mPeopleIMetListener;
 
     @Override
     public void onCreate() {
@@ -78,7 +79,6 @@ public class GeoFireService extends Service
         // init Firebase database
         FirebaseDatabase dataRef = FirebaseDatabase.getInstance();
         mFireBaseProfiles = dataRef.getReference("profiles");
-
         mOnlineUsers = dataRef.getReference("onlineUsers");
         mOnlineUsers.child(mUserUid).setValue(true);
         mOnlineUsers.child(mUserUid).onDisconnect().setValue(false);
@@ -164,7 +164,7 @@ public class GeoFireService extends Service
                 if (!key.matches(mUserUid)){
                     mIWantToEngage.setValue(key);
 
-                    // init mUserWantsToEngage and set listener
+                    // init mUserWantsToEngage and set listener for if key wants to engage
                     mUserWantsToEngage = FirebaseDatabase.getInstance().getReference("mEstablishedConnection").child(key);
                     mUserWantsToEngage.addValueEventListener(mWantToEngageListener = new ValueEventListener() {
                         @Override
@@ -177,8 +177,43 @@ public class GeoFireService extends Service
                         }
                     });
 
-                    // proceed if key is online, AlertActivity is not in front and mUserEngageData is set to mUserUid
-                    if (keyIsOnline(key) && mUserEngageData.equals(mUserUid)
+                    // check if client have met key before
+                    mPeopleIMet = FirebaseDatabase.getInstance().getReference("peopleIMet").child(mUserUid).child(key);
+                    mPeopleIMet.addValueEventListener(mPeopleIMetListener = new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            if (dataSnapshot.exists()){
+
+                                // get timestamp
+                                PersonIMet personIMet = dataSnapshot.getValue(PersonIMet.class);
+                                Long keyTimeStamp = personIMet.getTimestampLong();
+
+                                // 24 hours day ago
+                                long oneDayAgo = System.currentTimeMillis() - Utils.TWENTY_FOUR_HOURS;
+
+                                // compare
+                                if (keyTimeStamp < oneDayAgo){
+                                    mMetPersonMoreThenADayAgo = true;
+                                    Toast.makeText(GeoFireService.this, "Met this person more then a day ago", Toast.LENGTH_SHORT).show();
+                                } else {
+                                    mMetPersonMoreThenADayAgo = false;
+                                    Toast.makeText(GeoFireService.this, "Met this person less then a day ago", Toast.LENGTH_SHORT).show();
+                                }
+
+                            } else {
+                                Toast.makeText(GeoFireService.this, "Have not met this person", Toast.LENGTH_SHORT).show();
+
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
+
+                    // proceed if (1) key is online (2) mUserEngageData is set to mUserUid (3) mMetPersonMoreThenADayAgo is true (4) AlertActivity is not in front
+                    if (keyIsOnline(key) && mUserEngageData.equals(mUserUid) && mMetPersonMoreThenADayAgo
                             && !PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getBoolean("ALERT_IS_INFRONT", false)){
 
                         // get profile info
